@@ -1,6 +1,8 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../../postgres/db"); // db.js faylingizni chaqiring
 
+
+
 const User = sequelize.define("User", {
   id: {
     type: DataTypes.INTEGER,
@@ -16,10 +18,17 @@ const User = sequelize.define("User", {
     allowNull: false,
     unique: true,
   },
+  password: { // 🔥 password maydoni borligiga ishonch hosil qiling
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
+
+
+
 sequelize
-  .sync({ alter: true }) // Jadval o‘chirilmaydi, faqat o‘zgarishlar kiritiladi
+.sync({ force: true }) // Jadval o‘chirilmaydi, faqat o‘zgarishlar kiritiladi
   .then(() => console.log("✅ Users jadvali yaratildi yoki yangilandi!"))
   .catch((err) => console.error("❌ Users jadvalini yaratishda xatolik:", err));
 

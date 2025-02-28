@@ -7,8 +7,8 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/login", login);
 
-router.get("/profile", authenticate, (req, res) => {
-    res.json({ message: `Xush kelibsiz, foydalanuvchi ID: ${req.user.id}` });
-  });
+// router.get("/profile", authenticate, (req, res) => {
+//     res.json({ message: `Xush kelibsiz, foydalanuvchi ID: ${req.user.id}` });
+//   });
 
 module.exports = router;

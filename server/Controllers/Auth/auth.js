@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../Model/Auth/user");
 const redisClient = require("../../redisClient");
@@ -7,49 +7,61 @@ require("dotenv").config();
 // 📌 Ro‘yxatdan o‘tish (Register)
 const register = async (req, res) => {
   try {
-    console.log("Kelayotgan body:", req.body);  // ✅ Body ni tekshirish
-    
     const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: "Barcha maydonlarni to‘ldiring!" });
-    }
 
-    // Foydalanuvchi bazada borligini tekshirish
-    if (await User.findOne({ where: { email } })) {
+    // Foydalanuvchi avval ro‘yxatdan o‘tmaganligini tekshirish
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
       return res.status(400).json({ message: "Bu email allaqachon ro‘yxatdan o‘tgan." });
     }
 
-    // Parolni hash qilish
+    // Parolni shifrlash (hash qilish)
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("🔑 Hashlangan parol:", hashedPassword);
 
-    // Yangi foydalanuvchini yaratish
-    const newUser = await User.create({ username, email, password: hashedPassword });
+    // Foydalanuvchini yaratish
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword, // 🔥 SHIFRLANGAN PAROLNI SAQLAYMIZ
+    });
 
-    res.status(201).json({ message: "Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi!", user: newUser });
+    res.status(201).json({ message: "Foydalanuvchi ro‘yxatdan o‘tdi!", user });
   } catch (error) {
-    console.error("Xatolik:", error);
-    res.status(500).json({ message: "Server xatosi." });
+    console.error("Ro‘yxatdan o‘tishda xatolik:", error);
+    res.status(500).json({ message: "Server xatosi" });
   }
 };
-
 
 // 📌 Tizimga kirish (Login)
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("Kelayotgan ma'lumotlar:", req.body);
+
+    // Foydalanuvchini bazadan topish
     const user = await User.findOne({ where: { email } });
-    
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+
+    // 🔹 Agar foydalanuvchi topilmasa, xatolik chiqarish
+    if (!user) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // Token yaratish
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    
-    // 🔹 Redisga tokenni saqlash
-    await redisClient.set(`user:${user.id}`, token, 'EX', 3600);
+    console.log("Bazada saqlangan hashedPassword:", user.password);
 
-    // Tokenni cookie orqali jo‘natish
+    // 🔹 Parolni tekshirish
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+    }
+
+    // 🔹 Token yaratish
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    // 🔹 Redisga tokenni saqlash
+    await redisClient.setEx(`user:${user.id}`, 3600, token); // ⚡ `setEx` Redisda token saqlash uchun ishlatiladi
+
+    // 🔹 Tokenni cookie orqali jo‘natish
     res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
     res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
   } catch (error) {
