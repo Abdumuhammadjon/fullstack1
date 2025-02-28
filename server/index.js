@@ -6,6 +6,23 @@ require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 
+
+const shortcuts = {
+  google: "https://www.google.com",
+  youtube: "https://www.youtube.com",
+  chat: "https://chat.openai.com"
+};
+
+app.get("/:shortcut", (req, res) => {
+  const url = shortcuts[req.params.shortcut];
+  if (url) {
+    res.redirect(301, url); // 301 - doimiy yo'naltirish
+  } else {
+    res.status(404).send("Bunday qisqa link mavjud emas.");
+  }
+});
+
+
 app.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()"); // Bazaga test so‘rov
