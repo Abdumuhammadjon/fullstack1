@@ -9,8 +9,10 @@ const PORT = process.env.PORT || 5000;
 const shortcuts = {
   google: "https://www.google.com",
   youtube: "https://www.youtube.com",
-  chat: "https://chat.openai.com"
+  chat: "https://chat.openai.com",
+  sinftest7: "http://localhost:5000" // O'zingizning sayt URL manzilini qo‘ying
 };
+
 
 app.get("/:shortcut", (req, res) => {
   const url = shortcuts[req.params.shortcut];
