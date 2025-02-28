@@ -1,19 +1,11 @@
-const Redis = require("ioredis");
-require("dotenv").config();
+const Redis = require('ioredis');
 
 const redis = new Redis({
-  host: process.env.REDIS_HOST, // Render.com Redis host manzili
-  port: process.env.REDIS_PORT, // Render.com Redis porti
-  password: process.env.REDIS_PASSWORD, // Agar Redis parol talab qilsa
-  tls: {}, // Render.com da SSL kerak bo‘lishi mumkin
+  host: 'redis-17635.c244.us-east-1-2.ec2.redns.redis-cloud.com',
+  port: 17635,
+  password: 'fWY10h6Kefzdh8XK9wM5L5SwLbQdwEXZ',
 });
 
-redis.on("connect", () => {
-  console.log("✅ Redis-ga muvaffaqiyatli ulandi!");
-});
-
-redis.on("error", (err) => {
-  console.error("❌ Redis xatosi:", err);
-});
-
-module.exports = redis;
+redis.ping()
+  .then(() => console.log('✅ Redis-ga muvaffaqiyatli ulandi!'))
+  .catch(err => console.error('❌ Redis xatosi:', err));
