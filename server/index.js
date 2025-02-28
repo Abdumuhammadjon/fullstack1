@@ -15,13 +15,15 @@ const shortcuts = {
 
 
 app.get("/:shortcut", (req, res) => {
+  console.log("Kelgan shortcut:", req.params.shortcut);
   const url = shortcuts[req.params.shortcut];
   if (url) {
-    res.redirect(301, url); // 301 - doimiy yo'naltirish
+    res.redirect(301, url);
   } else {
-    res.status(404).send("Bunday qisqa link mavjud emas.")
+    res.status(404).send("Bunday qisqa link mavjud emas.");
   }
 });
+
 
 app.get("/", async (req, res) => {
   try {
