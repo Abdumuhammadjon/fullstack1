@@ -28,7 +28,7 @@ app.get("/:shortcut", (req, res) => {
 app.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()"); // Bazaga test so‘rov
-    res.send(`Baza ishladi: ${result.rows[0].now} ishladiii`);
+    res.send(`Baza ishladi:  ishladiii`);
     console.log('databaza ishladi')
   } catch (err) {
     console.error(err);
