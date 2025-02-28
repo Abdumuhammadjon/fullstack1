@@ -14,6 +14,8 @@ const shortcuts = {
   sinftest7: "http://localhost:5000" // O'zingizning sayt URL manzilini qo‘ying
 };
 
+app.use(express.json());
+
 app.use("/auth", authRoutes)
 
 app.get("/:shortcut", (req, res) => {
