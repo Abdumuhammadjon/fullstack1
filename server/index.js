@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const pool = require("./postgres/db.js");
 const redis = require("./redis/redis.js"); // db.js ni import qildik
+const authRoutes = require("./Routes/Auth/auth.js");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
@@ -13,6 +14,7 @@ const shortcuts = {
   sinftest7: "http://localhost:5000" // O'zingizning sayt URL manzilini qo‘ying
 };
 
+app.use("/auth", authRoutes)
 
 app.get("/:shortcut", (req, res) => {
   console.log("Kelgan shortcut:", req.params.shortcut);
