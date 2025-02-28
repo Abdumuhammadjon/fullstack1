@@ -18,7 +18,7 @@ app.get("/:shortcut", (req, res) => {
   if (url) {
     res.redirect(301, url); // 301 - doimiy yo'naltirish
   } else {
-    res.status(404).send("Bunday qisqa link mavjud emas.");
+    res.status(404).send("Bunday qisqa link mavjud emas.")
   }
 });
 
