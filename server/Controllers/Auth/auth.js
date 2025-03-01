@@ -37,31 +37,31 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("Kelayotgan ma'lumotlar:", req.body);
 
-    // Foydalanuvchini bazadan topish
+    // ✅ 1. Redis'dan foydalanuvchini tekshirish
+    const cachedUser = await redisClient.get(`user:${email}`);
+    if (cachedUser) {
+      const user = JSON.parse(cachedUser);
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      return res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
+    }
+
+    // ✅ 2. Bazadan foydalanuvchini olish
     const user = await User.findOne({ where: { email } });
-
-    // 🔹 Agar foydalanuvchi topilmasa, xatolik chiqarish
     if (!user) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    console.log("Bazada saqlangan hashedPassword:", user.password);
-
-    // 🔹 Parolni tekshirish
+    // ✅ 3. Parolni tekshirish
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // 🔹 Token yaratish
+    // ✅ 4. Token yaratish va Redis'ga foydalanuvchini qo‘shish
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    await redisClient.setEx(`user:${email}`, 3600, JSON.stringify(user)); // Foydalanuvchini Redisga qo‘shish
 
-    // 🔹 Redisga tokenni saqlash
-    await redisClient.setEx(`user:${user.id}`, 3600, token); // ⚡ `setEx` Redisda token saqlash uchun ishlatiladi
-
-    // 🔹 Tokenni cookie orqali jo‘natish
     res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
     res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
   } catch (error) {
@@ -69,5 +69,6 @@ const login = async (req, res) => {
     res.status(500).json({ message: "Server xatosi." });
   }
 };
+
 
 module.exports = { register, login };
