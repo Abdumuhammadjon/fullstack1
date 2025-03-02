@@ -17,7 +17,7 @@ const register = async (req, res) => {
 
     // Parolni shifrlash (hash qilish)
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("🔑 Hashlangan parol:", hashedPassword);
+    // console.log("🔑 Hashlangan parol:", hashedPassword);
 
     // Foydalanuvchini yaratish
     const user = await User.create({
