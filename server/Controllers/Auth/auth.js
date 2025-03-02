@@ -57,7 +57,8 @@ const login = async (req, res) => {
     }
 
     // ✅ 2. Bazadan foydalanuvchini olish
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email: email } });
+
     if (!user) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
