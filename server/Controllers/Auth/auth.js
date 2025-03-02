@@ -73,7 +73,7 @@ const login = async (req, res) => {
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
     await redisClient.setEx(`user:${email}`, 3600, JSON.stringify(user)); // Foydalanuvchini Redisga qo‘shish
 
-    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
+    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" })
     res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
   } catch (error) {
     console.error("Xatolik:", error);
