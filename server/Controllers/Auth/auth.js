@@ -26,7 +26,7 @@ const register = async (req, res) => {
       password: hashedPassword, // 🔥 SHIFRLANGAN PAROLNI SAQLAYMIZ
     });
 
-    res.status(201).json({ message: "Foydalanuvchi ro‘yxatdan o‘tdi!", user });
+    res.status(201).json({ message: "Foydalanuvchi ro‘yxatdan o‘tdi!"});
   } catch (error) {
     console.error("Ro‘yxatdan o‘tishda xatolik:", error);
     res.status(500).json({ message: "Server xatosi" });
