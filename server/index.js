@@ -4,7 +4,7 @@ const pool = require("./postgres/db.js");
 const redis = require("./redis/redis.js"); // db.js ni import qildik
 const authRoutes = require("./Routes/Auth/auth.js");
 require("dotenv").config();
-
+const cors =require('cors')
 const PORT = process.env.PORT || 5000;
 
 const shortcuts = {
@@ -15,6 +15,7 @@ const shortcuts = {
 };
 
 app.use(express.json());
+app.use(cors())
 
 app.use("/auth", authRoutes)
 
