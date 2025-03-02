@@ -9,24 +9,34 @@ const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Foydalanuvchi avval ro‘yxatdan o‘tmaganligini tekshirish
-    const existingUser = await User.findOne({ where: { email } });
+    // 1️⃣ Kiruvchi ma'lumotlarni tekshirish
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Barcha maydonlarni to‘ldiring!" });
+    }
+
+    // 2️⃣ Foydalanuvchi email orqali mavjudligini tekshirish (lowercase email saqlash)
+    const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
     if (existingUser) {
       return res.status(400).json({ message: "Bu email allaqachon ro‘yxatdan o‘tgan." });
     }
 
-    // Parolni shifrlash (hash qilish)
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // console.log("🔑 Hashlangan parol:", hashedPassword);
+    // 3️⃣ Parol uzunligi va xavfsizligini tekshirish
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Parol kamida 6 ta belgidan iborat bo‘lishi kerak!" });
+    }
 
-    // Foydalanuvchini yaratish
+    // 4️⃣ Parolni shifrlash
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 5️⃣ Foydalanuvchini yaratish
     const user = await User.create({
       username,
-      email,
-      password: hashedPassword, // 🔥 SHIFRLANGAN PAROLNI SAQLAYMIZ
+      email: email.toLowerCase(), // 🔥 email har doim kichik harflarda saqlanadi
+      password: hashedPassword, 
     });
 
-    res.status(201).json({ message: "Foydalanuvchi ro‘yxatdan o‘tdi!"});
+    res.status(201).json({ message: "Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi!", userId: user.id });
+
   } catch (error) {
     console.error("Ro‘yxatdan o‘tishda xatolik:", error);
     res.status(500).json({ message: "Server xatosi" });
