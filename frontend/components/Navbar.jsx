@@ -15,7 +15,7 @@ const Navbar = () => {
   )
 }
 const styles = {
-    navbar: { display: "flex", justifyContent: "space-between", padding: "15px", background: "#333", color: "#fff" },
+    navbar: { display: "flex", justifyContent: "space-between", padding: "15px", background: "#334", color: "#fff" },
     logo: { fontSize: "20px", fontWeight: "bold" },
     navLinks: { listStyle: "none", display: "flex", gap: "15px" }
   };
