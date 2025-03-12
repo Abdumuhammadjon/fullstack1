@@ -6,6 +6,7 @@ const authRoutes = require("./Routes/Auth/auth.js");
 require("dotenv").config();
 const helmet = require('helmet');
 const cors =require('cors')
+const cookieParser = require("cookie-parser")
 const PORT = process.env.PORT || 5000;
 
 const shortcuts = {
@@ -22,6 +23,7 @@ app.use(
     credentials: true, // Cookie’lar uchun
   })
 );
+app.use(cookieParser());
 app.use(helmet());
 
 

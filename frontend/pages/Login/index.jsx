@@ -1,9 +1,12 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import axios from "axios"; // axios import qilinadi
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -11,31 +14,27 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // Xatolikni tozalash
+    setError(null);
 
     try {
-      const res = await fetch("http://localhost:5001/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await axios.post(
+        "http://localhost:5001/auth/login",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, // Cookie’ni qabul qilish va yuborish uchun
+        }
+      );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
+      console.log("✅ Login successful:", res.data);
 
-      console.log("✅ Login successful:", data);
-
-      // Token saqlash (agar kerak bo‘lsa)
-      localStorage.setItem("token", data.token);
-
-      // Foydalanuvchini dashboard sahifasiga yo‘naltirish
-      window.location.href = "/dashboard"; 
-
+      // Cookie avtomatik saqlanadi, localStorage kerak emas
+      router.push("/dashboard"); // Dashboard’ga yo‘naltirish
     } catch (err) {
-      console.error("❌ Login error:", err.message);
-      setError(err.message);
+      console.error("❌ Login error:", err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -69,12 +68,15 @@ const Login = () => {
               placeholder="Enter your password"
             />
           </div>
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          >
             Login
           </button>
         </form>
         <p className="text-center mt-4 text-gray-600">
-          Don't have an account?
+          Don’t have an account?
           <Link href="/register" className="text-blue-500 ml-1">
             Register
           </Link>

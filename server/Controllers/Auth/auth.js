@@ -43,51 +43,58 @@ const register = async (req, res) => {
   }
 };
 
-// 📌 Tizimga kirish (Login)
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("Kelayotgan ma’lumotlar:", { email, password }); // 1-qadam: Kelayotgan ma’lumotlarni tekshirish
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email va parol kiritilishi shart!" });
+    }
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    console.log("Kelayotgan ma’lumotlar:", { email: trimmedEmail, password: trimmedPassword });
 
-    // 1. Bazadan foydalanuvchini olish
-    const user = await User.findOne({ where: { email: email } });
+    // Bazadan foydalanuvchini olish
+    const user = await User.findOne({ where: { email: trimmedEmail } });
     if (!user) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
-    console.log("Bazadagi user:", { id: user.id, email: user.email, password: user.password }); // 2-qadam: User ma’lumotlari
+    console.log("Bazadagi user:", { id: user.id, email: user.email, password: user.password });
 
-    // 2. Parolni tekshirish
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Parol mosligi:", isMatch); // 3-qadam: bcrypt natijasini tekshirish
+    // Parolni tekshirish
+    const isMatch = await bcrypt.compare(trimmedPassword, user.password);
+    console.log("Parol mosligi:", isMatch);
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // 3. Token yaratish
+    // Token yaratish
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // 4. Redis’ga saqlash (optimallashtirish uchun)
-    const cachedUser = await redisClient.get(`user:${email}`);
-    if (!cachedUser) {
-      await redisClient.setEx(`user:${email}`, 3600, JSON.stringify(user));
-    }
+    // Redis’da tokenni yangilash (faqat user:id bilan)
+    await redisClient.setEx(`user:${user.id}`, 3600, token);
+    console.log("Redis’ga saqlangan token:", token);
 
-    // 5. Cookie’ni sozlash
+    // Cookie’ni sozlash
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.JWT_SECRET,
       sameSite: "Strict",
       maxAge: 60 * 60 * 1000,
     });
 
-    // 6. Javob qaytarish
-    res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!" });
+    // Foydalanuvchi ma’lumotlarini keshga saqlash (agar kerak bo‘lsa)
+    await redisClient.setEx(`user-data:${user.id}`, 3600, JSON.stringify({
+      id: user.id,
+      email: user.email,
+      password: user.password,
+    }));
+
+    res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!" });
   } catch (error) {
-    console.error("Xatolik:", error);
-    res.status(500).json({ message: "Server xatosi." });
+    console.error("Xatolik:", error.message || error);
+    res.status(500).json({ message: "Server xatosi!" });
   }
 };
-
 const getProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);

@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import Head from "next/head";
 import Layout from "../components/Layout";
 import { useEffect, useState } from "react";
-import axios from "axios"; // axios import qo‘shildi
+import axios from "axios";
 
 export default function App({ Component, pageProps }) {
   const [user, setUser] = useState(null);
@@ -11,7 +11,7 @@ export default function App({ Component, pageProps }) {
     const fetchUser = async () => {
       try {
         const response = await axios.get("http://localhost:5001/auth/profile", {
-          withCredentials: true, // Cookie’ni yuborish uchun
+          withCredentials: true, // Cookie’ni yuborish
         });
         setUser(response.data);
       } catch (error) {
@@ -32,7 +32,7 @@ export default function App({ Component, pageProps }) {
         />
       </Head>
       <Layout>
-        <Component {...pageProps} user={user} /> {/* user props sifatida uzatildi */}
+        <Component {...pageProps} user={user} />
       </Layout>
     </>
   );
