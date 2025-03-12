@@ -53,41 +53,54 @@ const login = async (req, res) => {
     const trimmedPassword = password.trim();
     console.log("Kelayotgan ma’lumotlar:", { email: trimmedEmail, password: trimmedPassword });
 
-    // Bazadan foydalanuvchini olish
-    const user = await User.findOne({ where: { email: trimmedEmail } });
-    if (!user) {
-      return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+    let user;
+    // 1. Redis keshidan foydalanuvchi ma’lumotlarini olish
+    const cachedUserData = await redisClient.get(`user-data:${trimmedEmail}`);
+    
+    if (cachedUserData) {
+      user = JSON.parse(cachedUserData);
+      console.log("Keshdan olingan user:", user);
+    } else {
+      // Keshda yo‘q bo‘lsa, bazadan olish
+      user = await User.findOne({ where: { email: trimmedEmail } });
+      if (!user) {
+        return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+      }
+      console.log("Bazadagi user:", { id: user.id, email: user.email, password: user.password });
+      
+      // Bazadan olingan ma’lumotni keshga saqlash
+      await redisClient.setEx(
+        `user-data:${trimmedEmail}`,
+        3600,
+        JSON.stringify({
+          id: user.id,
+          email: user.email,
+          password: user.password,
+        })
+      );
     }
-    console.log("Bazadagi user:", { id: user.id, email: user.email, password: user.password });
 
-    // Parolni tekshirish
+    // 2. Parolni tekshirish
     const isMatch = await bcrypt.compare(trimmedPassword, user.password);
     console.log("Parol mosligi:", isMatch);
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // Token yaratish
+    // 3. Token yaratish
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // Redis’da tokenni yangilash (faqat user:id bilan)
+    // 4. Redis’da tokenni yangilash
     await redisClient.setEx(`user:${user.id}`, 3600, token);
     console.log("Redis’ga saqlangan token:", token);
 
-    // Cookie’ni sozlash
+    // 5. Cookie’ni sozlash
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.JWT_SECRET,
+      secure: process.env.JWT_SECRET, // Xatolik: process.env.JWT_SECRET o‘rniga NODE_ENV
       sameSite: "Strict",
       maxAge: 60 * 60 * 1000,
     });
-
-    // Foydalanuvchi ma’lumotlarini keshga saqlash (agar kerak bo‘lsa)
-    await redisClient.setEx(`user-data:${user.id}`, 3600, JSON.stringify({
-      id: user.id,
-      email: user.email,
-      password: user.password,
-    }));
 
     res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!" });
   } catch (error) {
