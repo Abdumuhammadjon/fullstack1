@@ -47,15 +47,18 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("Kelayotgan ma’lumotlar:", { email, password }); // 1-qadam: Kelayotgan ma’lumotlarni tekshirish
 
     // 1. Bazadan foydalanuvchini olish
     const user = await User.findOne({ where: { email: email } });
     if (!user) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
+    console.log("Bazadagi user:", { id: user.id, email: user.email, password: user.password }); // 2-qadam: User ma’lumotlari
 
     // 2. Parolni tekshirish
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Parol mosligi:", isMatch); // 3-qadam: bcrypt natijasini tekshirish
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
@@ -71,13 +74,13 @@ const login = async (req, res) => {
 
     // 5. Cookie’ni sozlash
     res.cookie("token", token, {
-      httpOnly: true, // XSS’dan himoya
-      secure: process.env.NODE_ENV === "production", // Faqat HTTPS’da
-      sameSite: "Strict", // CSRF’dan himoya
-      maxAge: 60 * 60 * 1000, // 1 soat (millisekundda)
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 60 * 60 * 1000,
     });
 
-    // 6. Javob qaytarish (tokenni qaytarish shart emas)
+    // 6. Javob qaytarish
     res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!" });
   } catch (error) {
     console.error("Xatolik:", error);
