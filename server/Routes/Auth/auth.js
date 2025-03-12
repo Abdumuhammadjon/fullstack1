@@ -1,5 +1,5 @@
 const express = require("express");
-const { register, login } = require("../../Controllers/Auth/auth");
+const { register, login, getProfile } = require("../../Controllers/Auth/auth");
 const authenticate = require("../../middleware/middleware");
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
@@ -24,6 +24,7 @@ const loginLimiter = rateLimit({
 // Routelar
 router.post("/register", register);
 router.post("/login", loginLimiter, login);
+router.get("/profile", authenticate, getProfile);
 
 // router.get("/profile", authenticate, (req, res) => {
 //   res.json({ message: `Xush kelibsiz, foydalanuvchi ID: ${req.user.id}` });

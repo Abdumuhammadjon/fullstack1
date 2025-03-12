@@ -48,40 +48,53 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ✅ 1. Bazadan foydalanuvchini olish
+    // 1. Bazadan foydalanuvchini olish
     const user = await User.findOne({ where: { email: email } });
     if (!user) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // ✅ 2. Parolni tekshirish
+    // 2. Parolni tekshirish
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // ✅ 3. Redis’dan tekshirish (agar kerak bo‘lsa, optimallashtirish uchun)
+    // 3. Token yaratish
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    // 4. Redis’ga saqlash (optimallashtirish uchun)
     const cachedUser = await redisClient.get(`user:${email}`);
-    let token;
-    if (cachedUser) {
-      // Agar Redis’da bo‘lsa, tokenni qayta ishlatish mumkin
-      token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    } else {
-      // ✅ 4. Token yaratish va Redis’ga qo‘shish
-      token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    if (!cachedUser) {
       await redisClient.setEx(`user:${email}`, 3600, JSON.stringify(user));
     }
 
-    // ✅ 5. Javob qaytarish
+    // 5. Cookie’ni sozlash
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      httpOnly: true, // XSS’dan himoya
+      secure: process.env.NODE_ENV === "production", // Faqat HTTPS’da
+      sameSite: "Strict", // CSRF’dan himoya
+      maxAge: 60 * 60 * 1000, // 1 soat (millisekundda)
     });
-    res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
+
+    // 6. Javob qaytarish (tokenni qaytarish shart emas)
+    res.json({ message: "Tizimga muvaffaqiyatli kirdingiz!" });
   } catch (error) {
     console.error("Xatolik:", error);
     res.status(500).json({ message: "Server xatosi." });
   }
 };
 
-module.exports = { register, login };
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
+    }
+    res.json({ id: user.id, email: user.email });
+  } catch (error) {
+    res.status(500).json({ message: "Server xatosi" });
+  }
+};
+
+module.exports = { register, login, getProfile };
