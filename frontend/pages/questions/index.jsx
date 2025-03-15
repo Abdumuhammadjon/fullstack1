@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import axios from 'axios'; // Axios ni import qilamiz
 
 export default function Admin() {
   const [questions, setQuestions] = useState([]);
@@ -50,23 +51,24 @@ export default function Admin() {
     setQuestions(newQuestions);
   };
 
-  // Ma’lumotlarni backendga jo‘natish
+  // Ma’lumotlarni backendga jo‘natish (Axios bilan)
   const saveQuestions = async () => {
     try {
-      const response = await fetch('/api/questions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(questions),
+      const response = await axios.post('http://localhost:5001/api/question', questions, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      if (response.ok) {
-        alert('Savollar muvaffaqiyatli saqlandi!');
-        setQuestions([]);
-      } else {
-        alert('Xatolik yuz berdi!');
+
+      if (response.status === 200) {
+        alert(response.data.message || 'Savollar muvaffaqiyatli saqlandi!'); // Backend xabarini ishlatamiz
+        setQuestions([]); // Saqlangandan keyin savollar ro‘yxatini tozalash
       }
     } catch (error) {
-      console.error('Xatolik:', error);
-      alert('Server bilan bog‘lanishda xatolik!');
+      console.error('Xatolik:', error.response?.data || error.message);
+      // Backend’dan kelgan xato xabarini ko‘rsatamiz
+      const errorMessage = error.response?.data?.message || 'Server bilan bog‘lanishda xatolik!';
+      alert(errorMessage);
     }
   };
 
