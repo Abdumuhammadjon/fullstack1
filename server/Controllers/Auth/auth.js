@@ -1,26 +1,39 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../../Model/Auth/user");
-const redisClient = require("../../redisClient");
-require("dotenv").config();
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
+const redisClient = require('../../redisClient');
+require('dotenv').config();
+
+// Supabase ulanish
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // 📌 Ro‘yxatdan o‘tish (Register)
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log(req.body)
+    
 
     // 1️⃣ Kiruvchi ma'lumotlarni tekshirish
     if (!username || !email || !password) {
       return res.status(400).json({ message: "Barcha maydonlarni to‘ldiring!" });
     }
 
-    // 2️⃣ Foydalanuvchi email orqali mavjudligini tekshirish (lowercase email saqlash)
-    const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
+    // 2️⃣ Email mavjudligini tekshirish
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('users')
+      .select('email')
+      .eq('email', email.toLowerCase())
+      .single();
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      return res.status(500).json({ message: "Tekshirishda xato" });
+    }
     if (existingUser) {
       return res.status(400).json({ message: "Bu email allaqachon ro‘yxatdan o‘tgan." });
     }
 
-    // 3️⃣ Parol uzunligi va xavfsizligini tekshirish
+    // 3️⃣ Parol uzunligini tekshirish
     if (password.length < 6) {
       return res.status(400).json({ message: "Parol kamida 6 ta belgidan iborat bo‘lishi kerak!" });
     }
@@ -29,20 +42,21 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 5️⃣ Foydalanuvchini yaratish
-    const user = await User.create({
-      username,
-      email: email.toLowerCase(), // 🔥 email har doim kichik harflarda saqlanadi
-      password: hashedPassword, 
-    });
+    const { data: user, error } = await supabase
+      .from('users')
+      .insert({ username, email: email.toLowerCase(), password: hashedPassword })
+      .select('id')
+      .single();
+    if (error) throw error;
 
     res.status(201).json({ message: "Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi!", userId: user.id });
-
   } catch (error) {
     console.error("Ro‘yxatdan o‘tishda xatolik:", error);
     res.status(500).json({ message: "Server xatosi" });
   }
 };
 
+// 📌 Kirish (Login)
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,54 +65,49 @@ const login = async (req, res) => {
     }
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
-    console.log("Kelayotgan ma’lumotlar:", { email: trimmedEmail, password: trimmedPassword });
 
     let user;
-    // 1. Redis keshidan foydalanuvchi ma’lumotlarini olish
+    // 1️⃣ Redis keshidan olish
     const cachedUserData = await redisClient.get(`user-data:${trimmedEmail}`);
-    
     if (cachedUserData) {
       user = JSON.parse(cachedUserData);
-      console.log("Keshdan olingan user:", user);
     } else {
-      // Keshda yo‘q bo‘lsa, bazadan olish
-      user = await User.findOne({ where: { email: trimmedEmail } });
-      if (!user) {
+      // Supabase’dan olish
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, password')
+        .eq('email', trimmedEmail)
+        .single();
+      if (error || !data) {
         return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
       }
-      console.log("Bazadagi user:", { id: user.id, email: user.email, password: user.password });
-      
-      // Bazadan olingan ma’lumotni keshga saqlash
+      user = data;
+
+      // Keshga saqlash
       await redisClient.setEx(
         `user-data:${trimmedEmail}`,
         3600,
-        JSON.stringify({
-          id: user.id,
-          email: user.email,
-          password: user.password,
-        })
+        JSON.stringify({ id: user.id, email: user.email, password: user.password })
       );
     }
 
-    // 2. Parolni tekshirish
+    // 2️⃣ Parolni tekshirish
     const isMatch = await bcrypt.compare(trimmedPassword, user.password);
-    console.log("Parol mosligi:", isMatch);
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // 3. Token yaratish
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // 3️⃣ Token yaratish
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // 4. Redis’da tokenni yangilash
+    // 4️⃣ Redis’da tokenni saqlash
     await redisClient.setEx(`user:${user.id}`, 3600, token);
-    console.log("Redis’ga saqlangan token:", token);
 
-    // 5. Cookie’ni sozlash
-    res.cookie("token", token, {
+    // 5️⃣ Cookie sozlash
+    res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.JWT_SECRET, // Xatolik: process.env.JWT_SECRET o‘rniga NODE_ENV
-      sameSite: "Strict",
+      secure: process.env.JWT_SECRET, // NODE_ENV ishlatiladi
+      sameSite: 'Strict',
       maxAge: 60 * 60 * 1000,
     });
 
@@ -108,10 +117,16 @@ const login = async (req, res) => {
     res.status(500).json({ message: "Server xatosi!" });
   }
 };
+
+// 📌 Profil olish
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('id', req.user.id)
+      .single();
+    if (error || !user) {
       return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
     }
     res.json({ id: user.id, email: user.email });
