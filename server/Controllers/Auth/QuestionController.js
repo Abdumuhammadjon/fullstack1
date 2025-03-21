@@ -2,47 +2,60 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Savollarni saqlash funksiyasi
+
+
+
 const saveQuestions = async (req, res) => {
-  
+  const questions = req.body;
+
   try {
-    const questions = req.body;
-    console.log(questions)                                                                                                                                            ;
-
-    // Ma'lumotlarni tekshirish
-    if (!Array.isArray(questions) || questions.length === 0) {
-      return res.status(400).json({ message: "Savollar ro'yxati bo'sh yoki noto'g'ri!" });
-    }
-
+    // Har bir savolning faqat bitta to'g'ri varianti borligini tekshirish
     for (const question of questions) {
-      if (!question.questionText || !Array.isArray(question.options) || question.options.length !== 4) {
-        return res.status(400).json({ message: "Savol yoki variantlar noto'g'ri formatda!" });
-      }
-      const hasCorrectOption = question.options.some(opt => opt.isCorrect);
-      if (!hasCorrectOption) {
-        return res.status(400).json({ message: "Har bir savolda kamida bitta to'g'ri variant bo'lishi kerak!" });
+      const correctOptions = question.options.filter(opt => opt.isCorrect).length;
+      if (correctOptions !== 1) {
+        return res.status(400).json({ message: 'Har bir savol uchun faqat bitta to\'g\'ri variant belgilanishi kerak!' });
       }
     }
 
-    // Supabase'ga savollarni saqlash
-    const { data, error } = await supabase
-      .from('questions') // Jadval nomini o‘zingizning jadvalingizga moslashtiring
-      .insert(questions.map(q => ({
-        questionText: q.questionText,
-        options: q.options, // Supabase JSON formatini qo‘llab-quvvatlaydi
-      })));
+    // Har bir savol va uning variantlarini bazaga kiritish
+    for (const question of questions) {
+      // Savolni kiritish
+      const { data: questionData, error: questionError } = await supabase
+      .from('questions')
+      .insert([{ question_text: question.questionText }])
+      .select()
+      .single();
+      if (questionError) {
+        throw new Error(questionError.message);
+      }
 
-    if (error) {
-      console.error("Supabase xatosi:", error);
-      return res.status(500).json({ message: "Savollarni saqlashda xatolik yuz berdi!" });
+      const questionId = questionData.id;
+
+      // Variantlarni kiritish
+      const optionsToInsert = question.options.map(opt => ({
+        question_id: questionId,
+        option_text: opt.text,
+        is_correct: opt.isCorrect
+      }));
+
+      const { error: optionsError } = await supabase
+        .from('options')
+        .insert(optionsToInsert);
+
+      if (optionsError) {
+        throw new Error(optionsError.message);
+      }
     }
 
-    return res.status(200).json({ message: "Savollar muvaffaqiyatli saqlandi!" });
+    // Muvaffaqiyatli javob
+    res.status(200).json({ message: 'Savollar muvaffaqiyatli saqlandi!' });
   } catch (error) {
-    console.error("Xatolik:", error);
-    return res.status(500).json({ message: "Server xatosi!" });
+    // Xato holati
+    res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // Express routerga ulash uchun eksport
 module.exports = { saveQuestions };
