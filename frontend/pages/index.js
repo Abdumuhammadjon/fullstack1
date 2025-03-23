@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 
 export default function Home() {
   return (
-    <main className="py-16 px-6 bg-gradient-to-b from-blue-50 to-white flex justify-center items-center">
+    <main className=" py-16 px-6 bg-gradient-to-b from-blue-50 to-white flex justify-center items-center">
   <div className="max-w-5xl w-full">
     {/* Sarlavha */}
     <div className="text-center mb-12">
