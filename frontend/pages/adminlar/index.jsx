@@ -44,7 +44,7 @@ export default function Dashboard() {
         role: data.role 
       };
 
-      const response = await axios.post("http://localhost:5001/api/users", userData);
+      const response = await axios.post("http://localhost:5001/auth/register", userData);
       console.log(response.data);
 
       if (editingUser) {
