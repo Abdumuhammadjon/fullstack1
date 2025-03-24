@@ -48,6 +48,8 @@ const Login = () => {
 
       const token = res.data.token;
       if (!token) throw new Error("Token kelmadi!");
+      console.log("Token:", Cookies.get("token"));
+
 
       Cookies.set("token", token, { expires: 1 }); // 🍪 Tokenni saqlash (1 kun)
 
