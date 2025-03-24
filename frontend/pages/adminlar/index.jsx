@@ -6,21 +6,21 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { create } from "zustand";
 import { Home, Users, BarChart, Settings, Menu } from "lucide-react";
-import axios from  'axios'
+import axios from 'axios';
 
 const ChartComponent = dynamic(() => import("../../components/ChartComponent"), { ssr: false });
 
 // Zustand store (holatni boshqarish)
-const useSubjectStore = create((set) => ({
-  subjects: [],
-  addSubject: (subject) => set((state) => ({ subjects: [...state.subjects, subject] })),
-  updateSubject: (id, updatedSubject) =>
+const useUserStore = create((set) => ({
+  users: [],
+  addUser: (user) => set((state) => ({ users: [...state.users, user] })),
+  updateUser: (id, updatedUser) =>
     set((state) => ({
-      subjects: state.subjects.map((subj) => (subj.id === id ? updatedSubject : subj)),
+      users: state.users.map((usr) => (usr.id === id ? updatedUser : usr)),
     })),
-  deleteSubject: (id) =>
+  deleteUser: (id) =>
     set((state) => ({
-      subjects: state.subjects.filter((subj) => subj.id !== id),
+      users: state.users.filter((usr) => usr.id !== id),
     })),
 }));
 
@@ -28,8 +28,8 @@ export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(true);
   const router = useRouter();
   const { register, handleSubmit, reset, setValue } = useForm();
-  const { subjects, addSubject, updateSubject, deleteSubject } = useSubjectStore();
-  const [editingSubject, setEditingSubject] = useState(null);
+  const { users, addUser, updateUser, deleteUser } = useUserStore();
+  const [editingUser, setEditingUser] = useState(null);
 
   const handleUsersClick = () => {
     router.push("/Superadmin");
@@ -37,15 +37,21 @@ export default function Dashboard() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:5001/api/subjects", data);
-  
+      const userData = { 
+        username: data.username, 
+        email: data.email, 
+        password: data.password, 
+        role: data.role 
+      };
+
+      const response = await axios.post("http://localhost:5001/api/users", userData);
       console.log(response.data);
-  
-      if (editingSubject) {
-        updateSubject(editingSubject.id, { ...data, id: editingSubject.id });
-        setEditingSubject(null);
+
+      if (editingUser) {
+        updateUser(editingUser.id, { ...userData, id: editingUser.id });
+        setEditingUser(null);
       } else {
-        addSubject({ ...data, id: Date.now().toString() });
+        addUser({ ...userData, id: Date.now().toString() });
       }
       reset();
       
@@ -53,9 +59,7 @@ export default function Dashboard() {
       console.log("Xatolik:", error);
     }
   };
-  ;
 
- 
   return (
     <div className="flex -ml-5 flex-col h-screen bg-gray-100">
       <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-10 top-0">
@@ -72,7 +76,7 @@ export default function Dashboard() {
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
               <Home size={24} /> {isOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" >
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
@@ -85,18 +89,20 @@ export default function Dashboard() {
         </div>
 
         <div className={`flex-1 transition-all p-8 pt-20`} style={{ marginLeft: isOpen ? "16rem" : "5rem" }}>
-         
-
-          
-
           <div className="mt-10 p-6 max-w-2xl border rounded">
-            <h2 className="text-2xl font-bold mb-4">Fanlarni boshqarish</h2>
+            <h2 className="text-2xl font-bold mb-4">Foydalanuvchilarni boshqarish</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <input {...register("name", { required: true })} placeholder="Fan nomi" className="border p-2 w-full" />
+              <input {...register("username", { required: true })} placeholder="Foydalanuvchi nomi" className="border p-2 w-full" />
               <input {...register("email", { required: true })} type="email" placeholder="Email" className="border p-2 w-full" />
               <input {...register("password", { required: true })} type="password" placeholder="Parol" className="border p-2 w-full" />
+              
+              <select {...register("role", { required: true })} className="border p-2 w-full">
+                <option value="user">Oddiy foydalanuvchi</option>
+                <option value="admin">Admin</option>
+              </select>
+
               <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                {editingSubject ? "Tahrirlash" : "Qo‘shish"}
+                {editingUser ? "Tahrirlash" : "Qo‘shish"}
               </button>
             </form>
           </div>
