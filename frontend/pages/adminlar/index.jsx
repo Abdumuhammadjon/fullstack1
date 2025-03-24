@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { create } from "zustand";
 import { Home, Users, BarChart, Settings, Menu } from "lucide-react";
+import axios from  'axios'
 
 const ChartComponent = dynamic(() => import("../../components/ChartComponent"), { ssr: false });
 
@@ -34,15 +35,25 @@ export default function Dashboard() {
     router.push("/Superadmin");
   };
 
-  const onSubmit = (data) => {
-    if (editingSubject) {
-      updateSubject(editingSubject.id, { ...data, id: editingSubject.id });
-      setEditingSubject(null);
-    } else {
-      addSubject({ ...data, id: Date.now().toString() });
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post("http://localhost:5001/api/subjects", data);
+  
+      console.log(response.data);
+  
+      if (editingSubject) {
+        updateSubject(editingSubject.id, { ...data, id: editingSubject.id });
+        setEditingSubject(null);
+      } else {
+        addSubject({ ...data, id: Date.now().toString() });
+      }
+      reset();
+      
+    } catch (error) {
+      console.log("Xatolik:", error);
     }
-    reset();
   };
+  ;
 
  
   return (
