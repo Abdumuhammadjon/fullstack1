@@ -31,7 +31,7 @@ export default function Dashboard() {
   const [editingSubject, setEditingSubject] = useState(null);
 
   const handleUsersClick = () => {
-    router.push("/adminlar");
+    router.push("/Superadmin");
   };
 
   const onSubmit = (data) => {
@@ -58,10 +58,10 @@ export default function Dashboard() {
           </button>
           {isOpen && <h2 className="text-2xl font-bold mb-6">Dashboard</h2>}
           <ul className="space-y-4">
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
               <Home size={24} /> {isOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" >
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">

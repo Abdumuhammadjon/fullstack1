@@ -4,6 +4,7 @@ const pool = require("./postgres/db.js");
 const redis = require("./redis/redis.js"); // db.js ni import qildik
 const authRoutes = require("./Routes/Auth/auth.js");
  const questions = require("./Routes/Auth/QuestionRouter.js");
+ const fanlar = require("./Routes/Auth/fanlar.js")
 require("dotenv").config();
 const helmet = require('helmet');
 const cors =require('cors')
@@ -30,7 +31,7 @@ app.use(helmet());
 
 app.use("/auth", authRoutes)
 app.use("/api", questions)
-
+app.use("/api", fanlar)
 app.get("/:shortcut", (req, res) => {
   console.log("Kelgan shortcut:", req.params.shortcut);
   const url = shortcuts[req.params.shortcut];
