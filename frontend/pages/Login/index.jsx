@@ -18,7 +18,7 @@ const Login = () => {
         console.log("🔍 Decoded Token:", decoded.role);
 
         if (decoded.role === "admin") {
-          setTimeout(() => router.push("/Superadmin")); // ⏳ Yo‘naltirish kechiktirildi
+          setTimeout(() => router.push("/Superadmin"), 100); // ⏳ Yo‘naltirish kechiktirildi
         } else {
           setTimeout(() => router.push("/"), 100);
         }
@@ -48,8 +48,6 @@ const Login = () => {
 
       const token = res.data.token;
       if (!token) throw new Error("Token kelmadi!");
-      console.log("Token:", Cookies.get("token"));
-
 
       Cookies.set("token", token, { expires: 1 }); // 🍪 Tokenni saqlash (1 kun)
 
