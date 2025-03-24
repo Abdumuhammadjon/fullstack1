@@ -52,6 +52,8 @@ const Login = () => {
       
       if (token) {
         const decoded = jwtDecode(token);
+        console.log(decoded.role);
+        
         if (decoded.role === "admin") {
           router.push("/Superadmin");
         } else {
