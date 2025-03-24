@@ -1,7 +1,13 @@
 "use client";
+
+import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import { create } from "zustand";
+import { Home, Users, BarChart, Settings, Menu } from "lucide-react";
+
+const ChartComponent = dynamic(() => import("../../components/ChartComponent"), { ssr: false });
 
 // Zustand store (holatni boshqarish)
 const useSubjectStore = create((set) => ({
@@ -18,9 +24,15 @@ const useSubjectStore = create((set) => ({
 }));
 
 export default function Dashboard() {
+  const [isOpen, setIsOpen] = useState(true);
+  const router = useRouter();
   const { register, handleSubmit, reset, setValue } = useForm();
   const { subjects, addSubject, updateSubject, deleteSubject } = useSubjectStore();
   const [editingSubject, setEditingSubject] = useState(null);
+
+  const handleUsersClick = () => {
+    router.push("/adminlar");
+  };
 
   const onSubmit = (data) => {
     if (editingSubject) {
@@ -32,50 +44,52 @@ export default function Dashboard() {
     reset();
   };
 
-  const onEdit = (subject) => {
-    setEditingSubject(subject);
-    setValue("name", subject.name);
-    setValue("email", subject.email);
-    setValue("password", subject.password);
-  };
-
+ 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Fanlarni boshqarish</h1>
+    <div className="flex flex-col h-screen bg-gray-100">
+      <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-10 top-0">
+        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+      </div>
 
-      {/* Fan yaratish va tahrirlash formasi */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 border p-4 rounded">
-        <input {...register("name", { required: true })} placeholder="Fan nomi" className="border p-2 w-full" />
-        <input {...register("email", { required: true })} type="email" placeholder="Email" className="border p-2 w-full" />
-        <input {...register("password", { required: true })} type="password" placeholder="Parol" className="border p-2 w-full" />
-        <div className="flex gap-2">
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-            {editingSubject ? "Tahrirlash" : "Qo‘shish"}
+      <div className="flex flex-1 pt-16">
+        <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 ${isOpen ? "w-64" : "w-20"} flex flex-col`}>
+          <button className="text-white mb-6 focus:outline-none self-end" onClick={() => setIsOpen(!isOpen)}>
+            <Menu size={24} />
           </button>
-          {editingSubject && (
-            <button onClick={() => { reset(); setEditingSubject(null); }} type="button" className="bg-gray-500 text-white px-4 py-2 rounded">
-              Bekor qilish
-            </button>
-          )}
+          {isOpen && <h2 className="text-2xl font-bold mb-6">Dashboard</h2>}
+          <ul className="space-y-4">
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+              <Home size={24} /> {isOpen && "Bosh sahifa"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
+              <Users size={24} /> {isOpen && "Foydalanuvchilar"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+              <BarChart size={24} /> {isOpen && "Hisobotlar"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+              <Settings size={24} /> {isOpen && "Sozlamalar"}
+            </li>
+          </ul>
         </div>
-      </form>
 
-      {/* Fanlar ro‘yxati */}
-      <div className="mt-6 space-y-4">
-        <h2 className="text-xl font-bold">Fanlar ro‘yxati</h2>
-        {subjects.length === 0 && <p>Hozircha hech qanday fan yo‘q.</p>}
-        {subjects.map((subject) => (
-          <div key={subject.id} className="border p-4 flex justify-between items-center">
-            <div>
-              <p><strong>{subject.name}</strong></p>
-              <p>Email: {subject.email}</p>
-            </div>
-            <div className="space-x-2">
-              <button onClick={() => onEdit(subject)} className="bg-yellow-500 text-white px-4 py-2 rounded">Tahrirlash</button>
-              <button onClick={() => deleteSubject(subject.id)} className="bg-red-500 text-white px-4 py-2 rounded">O‘chirish</button>
-            </div>
+        <div className={`flex-1 transition-all p-8 pt-20`} style={{ marginLeft: isOpen ? "16rem" : "5rem" }}>
+         
+
+          
+
+          <div className="mt-10 p-6 max-w-2xl border rounded">
+            <h2 className="text-2xl font-bold mb-4">Fanlarni boshqarish</h2>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <input {...register("name", { required: true })} placeholder="Fan nomi" className="border p-2 w-full" />
+              <input {...register("email", { required: true })} type="email" placeholder="Email" className="border p-2 w-full" />
+              <input {...register("password", { required: true })} type="password" placeholder="Parol" className="border p-2 w-full" />
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                {editingSubject ? "Tahrirlash" : "Qo‘shish"}
+              </button>
+            </form>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
