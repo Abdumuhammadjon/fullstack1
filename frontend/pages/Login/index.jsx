@@ -18,7 +18,7 @@ const Login = () => {
         console.log("🔍 Decoded Token:", decoded.role);
 
         if (decoded.role === "admin") {
-          setTimeout(() => router.push("/Superadmin"), 100); // ⏳ Yo‘naltirish kechiktirildi
+          setTimeout(() => router.push("/Superadmin")); // ⏳ Yo‘naltirish kechiktirildi
         } else {
           setTimeout(() => router.push("/"), 100);
         }
