@@ -1,68 +1,102 @@
-import { useState } from "react";
-
-const subjects = {
-  Matematika: [
-    { id: 1, question: "2 + 2 nechaga teng?" },
-    { id: 2, question: "5 × 3 nechaga teng?" },
-  ],
-  Biologiya: [
-    { id: 1, question: "DNK nima?" },
-    { id: 2, question: "O'simliklar qanday nafas oladi?" },
-  ],
-  Fizika: [
-    { id: 1, question: "Nyutonning 2-qonuni nima?" },
-    { id: 2, question: "Nima uchun osmon ko'k?" },
-  ],
-};
+import { useState, useEffect } from "react";
 
 export default function QuestionApp() {
+  const [subjects, setSubjects] = useState([]); // Fanlar ro‘yxati
   const [selectedSubject, setSelectedSubject] = useState("");
+  const [questions, setQuestions] = useState([]); // Backenddan kelgan savollar
   const [answers, setAnswers] = useState({});
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // 1️⃣ Backenddan fanlarni olish
+  useEffect(() => {
+    fetch("http://localhost:5000/subjects") // Backend API
+      .then((res) => res.json())
+      .then((data) => setSubjects(data))
+      .catch((err) => console.error("Fanlarni olishda xatolik:", err));
+  }, []);
+
+  // 2️⃣ Tanlangan fan bo‘yicha savollarni olish
+  useEffect(() => {
+    if (!selectedSubject) return;
+    setLoading(true);
+
+    fetch(`http://localhost:5000/questions?subject=${selectedSubject}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setQuestions(data);
+        setLoading(false);
+        setAnswers({});
+      })
+      .catch((err) => {
+        console.error("Savollarni olishda xatolik:", err);
+        setLoading(false);
+      });
+  }, [selectedSubject]);
+
+  // 3️⃣ Foydalanuvchi javoblarini yig‘ish
   const handleAnswerChange = (questionId, answer) => {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
+  // 4️⃣ Javoblarni backendga yuborish
   const handleSubmit = () => {
-    console.log("Yuborilgan javoblar:", answers);
-    setSubmitted(true);
+    fetch("http://localhost:5000/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject: selectedSubject, answers }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Yuborildi:", data);
+        setSubmitted(true);
+      })
+      .catch((err) => console.error("Javoblarni yuborishda xatolik:", err));
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
       <div className="bg-white shadow-lg rounded-xl p-6 max-w-lg w-full">
-        <h1 className="text-2xl font-semibold mb-4 text-center">Fanlar bo‘yicha test</h1>
-        
+        <h1 className="text-2xl font-semibold mb-4 text-center">Fan bo‘yicha test</h1>
+
+        {/* Fan tanlash select */}
         <select
           className="w-full p-3 border rounded-md mb-4"
           value={selectedSubject}
           onChange={(e) => {
             setSelectedSubject(e.target.value);
-            setAnswers({});
             setSubmitted(false);
           }}
         >
           <option value="">Fan tanlang</option>
-          {Object.keys(subjects).map((subject) => (
+          {subjects.map((subject) => (
             <option key={subject} value={subject}>
               {subject}
             </option>
           ))}
         </select>
 
-        {selectedSubject ? (
-          subjects[selectedSubject].length > 0 ? (
+        {/* Savollar yuklanishi */}
+        {loading ? (
+          <p className="text-gray-500 text-center">Savollar yuklanmoqda...</p>
+        ) : selectedSubject ? (
+          questions.length > 0 ? (
             <div className="space-y-4">
-              {subjects[selectedSubject].map((q) => (
+              {questions.map((q) => (
                 <div key={q.id} className="p-4 border rounded-md">
                   <p className="font-medium">{q.question}</p>
-                  <input
-                    type="text"
-                    placeholder="Javobingizni kiriting..."
-                    className="w-full p-2 border rounded-md mt-2"
-                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                  />
+                  {q.options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name={`question-${q.id}`}
+                        value={option}
+                        className="h-4 w-4"
+                        onChange={() => handleAnswerChange(q.id, option)}
+                      />
+                      <label>{option}</label>
+                    </div>
+                  ))}
                 </div>
               ))}
 
@@ -82,7 +116,7 @@ export default function QuestionApp() {
 
         {submitted && (
           <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-600 rounded-md">
-            <p className="text-green-700">Javoblar yuborildi!</p>
+            <p className="text-green-700">Javoblar muvaffaqiyatli yuborildi!</p>
           </div>
         )}
       </div>
