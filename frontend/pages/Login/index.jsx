@@ -1,12 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import axios from "axios"; // axios import qilinadi
+import axios from "axios";
+import Cookies from "js-cookie";
+import {jwtDecode }from "jwt-decode"; // ✅ Tokenni decode qilish uchun
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    // ✅ Cookie ichidagi tokenni tekshirish va sahifaga yo‘naltirish
+    const token = Cookies.get("token"); // 🍪 Tokenni olib kelish
+    if (token) {
+      try {
+        const decoded = jwtDecode(token); // 🔑 Tokenni decode qilish
+        console.log("🔍 Decoded Token:", decoded.role);
+
+        if (decoded.role === "admin") {
+          router.push("/Superadmin"); // 👨‍💼 Admin sahifasi
+        } else {
+          router.push("/"); // 👤 Oddiy foydalanuvchi sahifasi
+        }
+      } catch (error) {
+        console.error("❌ Token decode qilishda xatolik:", error);
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,14 +45,23 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          withCredentials: true, // Cookie’ni qabul qilish va yuborish uchun
+          withCredentials: true, // 🍪 Cookie’ni qabul qilish
         }
       );
+      const token = res.data.token || Cookies.get("token")
+      
+      if (token) {
+        const decoded = jwtDecode(token);
+        if (decoded.role === "admin") {
+          router.push("/Superadmin");
+        } else {
+          router.push("/");
+        }
+      }
 
-      console.log("✅ Login successful:", res.data);
+      console.log("✅ Login successful:", res.data, token);
 
-      // Cookie avtomatik saqlanadi, localStorage kerak emas
-      router.push("/dashboard"); // Dashboard’ga yo‘naltirish
+      // ✅ Cookie avtomatik saqlanadi, endi tokenni tekshiramiz
     } catch (err) {
       console.error("❌ Login error:", err.response?.data?.message || err.message);
       setError(err.response?.data?.message || "Login failed");

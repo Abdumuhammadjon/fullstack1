@@ -114,7 +114,7 @@ const login = async (req, res) => {
     }
 
     // 3️⃣ Token yaratish
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id , role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     // 4️⃣ Redis’da tokenni saqlash
     await redisClient.setEx(`user:${user.id}`, 3600, token);
