@@ -127,7 +127,7 @@ const login = async (req, res) => {
       maxAge: 60 * 60 * 1000,
     });
 
-    res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!" });
+    res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!" , token});
   } catch (error) {
     console.error("Xatolik:", error.message || error);
     res.status(500).json({ message: "Server xatosi!" });
