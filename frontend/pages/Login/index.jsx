@@ -52,7 +52,8 @@ const Login = () => {
       Cookies.set("token", token, { expires: 1 }); // 🍪 Tokenni saqlash (1 kun)
 
       const decoded = jwtDecode(token);
-      console.log("🟢 Token:", decoded);
+      console.log("🟢 Token:", decoded, 'salom');
+      console.log("🟢 Tokeni:", decoded.role, 'salom');
 
       if (decoded.role === "admin") {
         router.push("/Superadmin");
