@@ -79,32 +79,37 @@ const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "Email va parol kiritilishi shart!" });
     }
+    
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
     let user;
+
     // 1️⃣ Redis keshidan olish
     const cachedUserData = await redisClient.get(`user-data:${trimmedEmail}`);
     if (cachedUserData) {
       user = JSON.parse(cachedUserData);
+      console.log("Keshdan olingan user:", user);
     } else {
       // Supabase’dan olish
       const { data, error } = await supabase
-  .from('users')
-  .select('id, email, password, role') // 🔥 role maydonini qo'shish
-  .eq('email', trimmedEmail)
-  .single();
+        .from("users")
+        .select("id, email, password, role") // 🔥 `role` maydonini qo'shish
+        .eq("email", trimmedEmail)
+        .single();
 
       if (error || !data) {
         return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
       }
+      
       user = data;
+      console.log("Bazadan olingan user:", user);
 
-      // Keshga saqlash
+      // 🔥 `role` ham keshga saqlansin
       await redisClient.setEx(
         `user-data:${trimmedEmail}`,
         3600,
-        JSON.stringify({ id: user.id, email: user.email, password: user.password })
+        JSON.stringify({ id: user.id, email: user.email, password: user.password, role: user.role }) 
       );
     }
 
@@ -115,30 +120,35 @@ const login = async (req, res) => {
     }
 
     // 3️⃣ Token yaratish
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    console.log("User.role mavjudligi tekshirilmoqda:", user.role);
     
+    const payload = {
+      id: user.id,
+      role: user.role || "defaultRole", // 🔥 `role` noto‘g‘ri kelsa, `defaultRole` ko‘rsatiladi
+    };
+    
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    
+    console.log("Generated Token:", token);
 
     // 4️⃣ Redis’da tokenni saqlash
     await redisClient.setEx(`user:${user.id}`, 3600, token);
 
     // 5️⃣ Cookie sozlash
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.JWT_SECRET, // NODE_ENV ishlatiladi
-      sameSite: 'Strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
       maxAge: 60 * 60 * 1000,
     });
 
-    res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!" , token});
+    res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
   } catch (error) {
     console.error("Xatolik:", error.message || error);
     res.status(500).json({ message: "Server xatosi!" });
   }
 };
+
 
 // 📌 Profil olish
 const getProfile = async (req, res) => {
