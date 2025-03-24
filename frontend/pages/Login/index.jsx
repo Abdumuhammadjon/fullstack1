@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Cookies from "js-cookie";
-import {jwtDecode }from "jwt-decode"; // ✅ Tokenni decode qilish uchun
+import { jwtDecode } from "jwt-decode"; // ✅ Tokenni decode qilish uchun
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -11,23 +11,22 @@ const Login = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // ✅ Cookie ichidagi tokenni tekshirish va sahifaga yo‘naltirish
     const token = Cookies.get("token"); // 🍪 Tokenni olib kelish
     if (token) {
       try {
-        const decoded = jwtDecode(token); // 🔑 Tokenni decode qilish
+        const decoded = jwtDecode(token);
         console.log("🔍 Decoded Token:", decoded.role);
 
         if (decoded.role === "admin") {
-          router.push("/Superadmin"); // 👨‍💼 Admin sahifasi
+          setTimeout(() => router.push("/Superadmin"), 100); // ⏳ Yo‘naltirish kechiktirildi
         } else {
-          router.push("/"); // 👤 Oddiy foydalanuvchi sahifasi
+          setTimeout(() => router.push("/"), 100);
         }
       } catch (error) {
         console.error("❌ Token decode qilishda xatolik:", error);
       }
     }
-  }, []);
+  }, [router]); // `router` useEffect ichida dependency sifatida berildi
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,28 +41,26 @@ const Login = () => {
         "http://localhost:5001/auth/login",
         formData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           withCredentials: true, // 🍪 Cookie’ni qabul qilish
         }
       );
-      const token = res.data.token || Cookies.get("token")
-      
-      if (token) {
-        const decoded = jwtDecode(token);
-        console.log(decoded.role);
-        
-        if (decoded.role === "admin") {
-          router.push("/Superadmin");
-        } else {
-          router.push("/");
-        }
+
+      const token = res.data.token;
+      if (!token) throw new Error("Token kelmadi!");
+
+      Cookies.set("token", token, { expires: 1 }); // 🍪 Tokenni saqlash (1 kun)
+
+      const decoded = jwtDecode(token);
+      console.log("🟢 Token:", decoded);
+
+      if (decoded.role === "admin") {
+        router.push("/Superadmin");
+      } else {
+        router.push("/");
       }
 
-      console.log("✅ Login successful:", res.data, token);
-
-      // ✅ Cookie avtomatik saqlanadi, endi tokenni tekshiramiz
+      console.log("✅ Login successful:", res.data);
     } catch (err) {
       console.error("❌ Login error:", err.response?.data?.message || err.message);
       setError(err.response?.data?.message || "Login failed");

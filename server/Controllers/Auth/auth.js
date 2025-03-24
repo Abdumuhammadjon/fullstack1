@@ -90,10 +90,11 @@ const login = async (req, res) => {
     } else {
       // Supabase’dan olish
       const { data, error } = await supabase
-        .from('users')
-        .select('id, email, password')
-        .eq('email', trimmedEmail)
-        .single();
+  .from('users')
+  .select('id, email, password, role') // 🔥 role maydonini qo'shish
+  .eq('email', trimmedEmail)
+  .single();
+
       if (error || !data) {
         return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
       }
