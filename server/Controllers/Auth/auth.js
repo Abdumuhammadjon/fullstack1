@@ -8,12 +8,10 @@ require('dotenv').config();
 // Supabase ulanish
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// 📌 Ro‘yxatdan o‘tish (Register)
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
     console.log(req.body);
-    
 
     // 1️⃣ Kiruvchi ma'lumotlarni tekshirish
     if (!username || !email || !password) {
@@ -22,39 +20,57 @@ const register = async (req, res) => {
 
     // 2️⃣ Email mavjudligini tekshirish
     const { data: existingUser, error: fetchError } = await supabase
-      .from('users')
-      .select('email')
-      .eq('email', email.toLowerCase())
+      .from("users")
+      .select("email")
+      .eq("email", email.toLowerCase())
       .single();
-    if (fetchError && fetchError.code !== 'PGRST116') {
+    if (fetchError && fetchError.code !== "PGRST116") {
       return res.status(500).json({ message: "Tekshirishda xato" });
     }
     if (existingUser) {
-      return res.status(400).json({ message: "Bu email allaqachon ro‘yxatdan o‘tgan." });
+      return res
+        .status(400)
+        .json({ message: "Bu email allaqachon ro‘yxatdan o‘tgan." });
     }
 
     // 3️⃣ Parol uzunligini tekshirish
     if (password.length < 6) {
-      return res.status(400).json({ message: "Parol kamida 6 ta belgidan iborat bo‘lishi kerak!" });
+      return res
+        .status(400)
+        .json({ message: "Parol kamida 6 ta belgidan iborat bo‘lishi kerak!" });
     }
 
     // 4️⃣ Parolni shifrlash
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5️⃣ Foydalanuvchini yaratish
+    // 5️⃣ Role ni tekshirish (agar kelmasa 'user' deb qabul qilish)
+    const userRole = role && role === "admin" ? "admin" : "user";
+
+    // 6️⃣ Foydalanuvchini yaratish
     const { data: user, error } = await supabase
-      .from('users')
-      .insert({ username, email: email.toLowerCase(), password: hashedPassword })
-      .select('id')
+      .from("users")
+      .insert({
+        username,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: userRole, // ✅ Role kiritildi
+      })
+      .select("id, role") // Role qaytarilishini ham tekshiramiz
       .single();
     if (error) throw error;
 
-    res.status(201).json({ message: "Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi!", userId: user.id });
+    res.status(201).json({
+      message: "Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi!",
+      userId: user.id,
+      role: user.role, // ✅ Role frontga qaytariladi
+    });
   } catch (error) {
     console.error("Ro‘yxatdan o‘tishda xatolik:", error);
     res.status(500).json({ message: "Server xatosi" });
   }
 };
+
+
 
 // 📌 Kirish (Login)
 const login = async (req, res) => {

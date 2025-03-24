@@ -36,6 +36,8 @@ export default function Dashboard() {
   };
 
   const onSubmit = async (data) => {
+    console.log(data);
+    
     try {
       const userData = { 
         username: data.username, 
