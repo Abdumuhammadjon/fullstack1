@@ -31,8 +31,8 @@ export default function Dashboard() {
   const fetchAdmins = async () => {
     try {
       const response = await axios.get("http://localhost:5001/api/admins");
-      console.log("Admins API Response:", response.data);
-      setAdmins(Array.isArray(response.data) ? response.data : []); // Faqat massiv kelganda o‘rnatish
+      console.log("Admins API Response:", response.data.admins);
+      setAdmins(response.data.admins); // Faqat massiv kelganda o‘rnatish
     } catch (error) {
       console.error("Error fetching admins:", error);
       setAdmins([]); // Xatolik bo‘lsa, bo‘sh massiv qo‘yish
@@ -126,7 +126,7 @@ export default function Dashboard() {
             <select value={admin} onChange={(e) => setAdmin(e.target.value)} className="border p-2 w-full mb-2">
               <option value="">Admin tanlang</option>
               {admins.map((adm) => (
-                <option key={adm.id} value={adm.name}>{adm.name}</option>
+                <option key={adm.id} value={adm.name}>{adm.username}</option>
               ))}
             </select>
             <button 
