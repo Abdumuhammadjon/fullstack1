@@ -34,7 +34,9 @@ export default function Dashboard() {
   const handleUsersClick = () => {
     router.push("/Superadmin");
   };
-
+  const handleSubjectClick = () => {
+    router.push("/Superadmin");
+  };
   const onSubmit = async (data) => {
     console.log(data);
     
@@ -80,6 +82,9 @@ export default function Dashboard() {
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleSubjectClick}>
+              <Users size={24} /> {isOpen && "Fan yaratish"}
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <BarChart size={24} /> {isOpen && "Hisobotlar"}
