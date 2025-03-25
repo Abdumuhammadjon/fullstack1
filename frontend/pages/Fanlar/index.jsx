@@ -126,7 +126,7 @@ export default function Dashboard() {
             <select value={admin} onChange={(e) => setAdmin(e.target.value)} className="border p-2 w-full mb-2">
               <option value="">Admin tanlang</option>
               {admins.map((adm) => (
-                <option key={adm.id} value={adm.name}>{adm.username}</option>
+                <option key={adm.id} value={adm.name}>{adm.email}</option>
               ))}
             </select>
             <button 
