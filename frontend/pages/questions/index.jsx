@@ -60,18 +60,32 @@ export default function Admin() {
   };
 
   return (
-    <div className="flex -ml-5  flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100">
       <Head>
         <title>Admin Paneli</title>
         <meta name="description" content="Savollar va variantlar qo‘shish" />
       </Head>
 
-      <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-10 top-0">
+      {/* HEADER */}
+      <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-50 top-0">
         <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
       </div>
 
+      {/* SIDEBAR BACKDROP */}
+      {isOpen && (
+        <div
+          className="bg-black bg-opacity-50 fixed inset-0 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
+
+      {/* MAIN CONTENT */}
       <div className="flex flex-1 pt-16">
-        <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 ${isOpen ? "w-64" : "w-20"}`}>
+        {/* SIDEBAR */}
+        <div
+          className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 z-50
+            ${isOpen ? "md:w-64" : "w-20"}`}
+        >
           <button className="text-white mb-6" onClick={() => setIsOpen(!isOpen)}>
             <Menu size={24} />
           </button>
@@ -91,7 +105,8 @@ export default function Admin() {
           </ul>
         </div>
 
-        <div className="min-h-screen flex flex-col items-center py-8 flex-1 ml-20">
+        {/* QUESTIONS */}
+        <div className={`min-h-screen flex flex-col items-center py-8 flex-1 transition-all duration-300 ${isOpen ? "ml-64" : "ml-20"}`}>
           <h1 className="text-3xl font-bold text-gray-800 mb-8">Savollar Qo‘shish</h1>
 
           <div className="w-full max-w-3xl space-y-8">
