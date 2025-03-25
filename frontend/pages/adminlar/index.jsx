@@ -35,7 +35,7 @@ export default function Dashboard() {
     router.push("/Superadmin");
   };
   const handleSubjectClick = () => {
-    router.push("/Superadmin");
+    router.push("/Fanlar");
   };
   const onSubmit = async (data) => {
     console.log(data);
