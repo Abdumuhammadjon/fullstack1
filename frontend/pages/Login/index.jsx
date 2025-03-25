@@ -18,7 +18,7 @@ const Login = () => {
         console.log("🔍 Decoded Token:", decoded.role);
 
         if (decoded.role === "admin") {
-          setTimeout(() => router.push("/Superadmin"), 100); // ⏳ Yo‘naltirish kechiktirildi
+          setTimeout(() => router.push("/questions"), 100); // ⏳ Yo‘naltirish kechiktirildi
         } else {
           setTimeout(() => router.push("/"), 100);
         }
@@ -56,7 +56,7 @@ const Login = () => {
       console.log("🟢 Tokeni:", decoded.role, 'salom');
 
       if (decoded.role === "admin") {
-        router.push("/Superadmin");
+        router.push("/questions");
       } else {
         router.push("/");
       }
