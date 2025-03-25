@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { Home, Users, BarChart, Settings, Menu } from "lucide-react";
+import { Home, Users, BarChart, Settings, Menu, PlusCircle, Edit, Trash } from "lucide-react";
 
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(true);
+  const [subjects, setSubjects] = useState([]);
+  const [newSubject, setNewSubject] = useState("");
+  const [admin, setAdmin] = useState("");
+  const [editingSubject, setEditingSubject] = useState(null);
   const router = useRouter();
 
   const handleUsersClick = () => {
@@ -14,6 +18,29 @@ export default function Dashboard() {
 
   const handleSubjectClick = () => {
     router.push("/Fanlar");
+  };
+
+  const addSubject = () => {
+    if (newSubject.trim() && admin.trim()) {
+      if (editingSubject !== null) {
+        setSubjects(subjects.map((subj, index) => index === editingSubject ? { name: newSubject, admin } : subj));
+        setEditingSubject(null);
+      } else {
+        setSubjects([...subjects, { name: newSubject, admin }]);
+      }
+      setNewSubject("");
+      setAdmin("");
+    }
+  };
+
+  const editSubject = (index) => {
+    setNewSubject(subjects[index].name);
+    setAdmin(subjects[index].admin);
+    setEditingSubject(index);
+  };
+
+  const deleteSubject = (index) => {
+    setSubjects(subjects.filter((_, i) => i !== index));
   };
 
   return (
@@ -45,6 +72,50 @@ export default function Dashboard() {
               <Settings size={24} /> {isOpen && "Sozlamalar"}
             </li>
           </ul>
+        </div>
+
+        <div className="flex-1 p-8 pt-20" style={{ marginLeft: isOpen ? "16rem" : "5rem" }}>
+          <div className="mt-10 p-6 max-w-2xl border rounded">
+            <h2 className="text-2xl font-bold mb-4">Fan yaratish</h2>
+            <input 
+              type="text" 
+              placeholder="Fan nomi" 
+              value={newSubject} 
+              onChange={(e) => setNewSubject(e.target.value)} 
+              className="border p-2 w-full mb-2" 
+            />
+            <input 
+              type="text" 
+              placeholder="Admin nomi" 
+              value={admin} 
+              onChange={(e) => setAdmin(e.target.value)} 
+              className="border p-2 w-full mb-2" 
+            />
+            <button 
+              onClick={addSubject} 
+              className="bg-blue-500 text-white px-4 py-2 rounded w-full">
+              {editingSubject !== null ? "Tahrirlash" : "Qo'shish"}
+            </button>
+          </div>
+
+          <div className="mt-6 p-6 max-w-2xl border rounded">
+            <h2 className="text-2xl font-bold mb-4">Yaratilgan fanlar</h2>
+            <ul className="space-y-2">
+              {subjects.map((subject, index) => (
+                <li key={index} className="border p-2 flex justify-between items-center">
+                  <span>{subject.name} - Admin: {subject.admin}</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => editSubject(index)} className="text-blue-500">
+                      <Edit size={18} />
+                    </button>
+                    <button onClick={() => deleteSubject(index)} className="text-red-500">
+                      <Trash size={18} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>
