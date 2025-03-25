@@ -20,17 +20,18 @@ const getAdmins = async (req, res) => {
   }
 };
 
+const { supabase } = require("../config/supabaseClient");
 
-// 📌 Yangi fan yaratish
+// 📌 Yangi fan qo‘shish
 const createSubject = async (req, res) => {
-  const { name, email, password } = req.body;
-console.log(req.body);
+  const { name, admin } = req.body;
+  console.log(req.body);
 
-  if (!name || !email || !password) {
+  if (!name || !admin) {
     return res.status(400).json({ error: "Barcha maydonlarni to‘ldiring!" });
   }
 
-  const { data, error } = await supabase.from("subjects").insert([{ name, email, password }]);
+  const { data, error } = await supabase.from("subjects").insert([{ name, admin }]);
 
   if (error) return res.status(500).json({ error: error.message });
 
@@ -49,11 +50,11 @@ const getSubjects = async (req, res) => {
 // 📌 Fanni yangilash
 const updateSubject = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password } = req.body;
+  const { name, admin } = req.body;
 
   const { data, error } = await supabase
     .from("subjects")
-    .update({ name, email, password })
+    .update({ name, admin })
     .eq("id", id);
 
   if (error) return res.status(500).json({ error: error.message });
@@ -71,5 +72,8 @@ const deleteSubject = async (req, res) => {
 
   res.json({ message: "Fan o‘chirildi!" });
 };
+
+
+
 
 module.exports = { createSubject, getSubjects, updateSubject, deleteSubject,  getAdmins };
