@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import axios from "axios";
 import { Home, Users, BarChart, Settings, Menu, PlusCircle, Edit, Trash } from "lucide-react";
 
 export default function Dashboard() {
@@ -9,27 +10,56 @@ export default function Dashboard() {
   const [subjects, setSubjects] = useState([]);
   const [newSubject, setNewSubject] = useState("");
   const [admin, setAdmin] = useState("");
+  const [admins, setAdmins] = useState([]);
   const [editingSubject, setEditingSubject] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetchSubjects();
+    fetchAdmins();
+  }, []);
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await axios.get("http://localhost:5001/subjects");
+      setSubjects(response.data);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const response = await axios.get("http://localhost:5001/admins");
+      setAdmins(response.data);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+    }
+  };
 
   const handleUsersClick = () => {
     router.push("/Superadmin");
   };
 
   const handleSubjectClick = () => {
-    router.push("/Fanlar");
+    router.push("/adminlar");
   };
 
-  const addSubject = () => {
+  const addSubject = async () => {
     if (newSubject.trim() && admin.trim()) {
-      if (editingSubject !== null) {
-        setSubjects(subjects.map((subj, index) => index === editingSubject ? { name: newSubject, admin } : subj));
+      try {
+        if (editingSubject !== null) {
+          await axios.put(`http://localhost:5001/subjects/${subjects[editingSubject].id}`, { name: newSubject, admin });
+        } else {
+          await axios.post("http://localhost:5001/subjects", { name: newSubject, admin });
+        }
+        fetchSubjects();
+        setNewSubject("");
+        setAdmin("");
         setEditingSubject(null);
-      } else {
-        setSubjects([...subjects, { name: newSubject, admin }]);
+      } catch (error) {
+        console.error("Error adding/updating subject:", error);
       }
-      setNewSubject("");
-      setAdmin("");
     }
   };
 
@@ -39,8 +69,13 @@ export default function Dashboard() {
     setEditingSubject(index);
   };
 
-  const deleteSubject = (index) => {
-    setSubjects(subjects.filter((_, i) => i !== index));
+  const deleteSubject = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5001/subjects/${id}`);
+      fetchSubjects();
+    } catch (error) {
+      console.error("Error deleting subject:", error);
+    }
   };
 
   return (
@@ -59,10 +94,10 @@ export default function Dashboard() {
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
               <Home size={24} /> {isOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg"  onClick={handleSubjectClick}>
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleSubjectClick}>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" >
               <Users size={24} /> {isOpen && "Fan yaratish"}
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
@@ -84,13 +119,12 @@ export default function Dashboard() {
               onChange={(e) => setNewSubject(e.target.value)} 
               className="border p-2 w-full mb-2" 
             />
-            <input 
-              type="text" 
-              placeholder="Admin nomi" 
-              value={admin} 
-              onChange={(e) => setAdmin(e.target.value)} 
-              className="border p-2 w-full mb-2" 
-            />
+            <select value={admin} onChange={(e) => setAdmin(e.target.value)} className="border p-2 w-full mb-2">
+              <option value="">Admin tanlang</option>
+              {admins.map((adm) => (
+                <option key={adm.id} value={adm.name}>{adm.name}</option>
+              ))}
+            </select>
             <button 
               onClick={addSubject} 
               className="bg-blue-500 text-white px-4 py-2 rounded w-full">
@@ -102,13 +136,13 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold mb-4">Yaratilgan fanlar</h2>
             <ul className="space-y-2">
               {subjects.map((subject, index) => (
-                <li key={index} className="border p-2 flex justify-between items-center">
+                <li key={subject.id} className="border p-2 flex justify-between items-center">
                   <span>{subject.name} - Admin: {subject.admin}</span>
                   <div className="flex gap-2">
                     <button onClick={() => editSubject(index)} className="text-blue-500">
                       <Edit size={18} />
                     </button>
-                    <button onClick={() => deleteSubject(index)} className="text-red-500">
+                    <button onClick={() => deleteSubject(subject.id)} className="text-red-500">
                       <Trash size={18} />
                     </button>
                   </div>
