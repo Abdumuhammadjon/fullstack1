@@ -4,8 +4,14 @@ const {
   createSubject,
   getSubjects,
   updateSubject,
-  deleteSubject,
+  deleteSubject, 
 } = require("../../Controllers/Auth/fanlar");
+const {
+   getAdmins,
+} = require("../../Controllers/Auth/fanlar")
+
+
+router.get("/admins", getAdmins);
 
 router.post("/subjects", createSubject);
 router.get("/subjects", getSubjects);

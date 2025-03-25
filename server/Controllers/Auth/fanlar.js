@@ -3,6 +3,24 @@ require('dotenv').config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+
+
+const getAdmins = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, username, email, role")
+      .eq("role", "admin");
+
+    if (error) throw error;
+
+    res.status(200).json({ success: true, admins: data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
 // 📌 Yangi fan yaratish
 const createSubject = async (req, res) => {
   const { name, email, password } = req.body;
@@ -54,4 +72,4 @@ const deleteSubject = async (req, res) => {
   res.json({ message: "Fan o‘chirildi!" });
 };
 
-module.exports = { createSubject, getSubjects, updateSubject, deleteSubject };
+module.exports = { createSubject, getSubjects, updateSubject, deleteSubject,  getAdmins };

@@ -30,12 +30,16 @@ export default function Dashboard() {
 
   const fetchAdmins = async () => {
     try {
-      const response = await axios.get("http://localhost:5001/admins");
-      setAdmins(response.data);
+      const response = await axios.get("http://localhost:5001/api/admins");
+      console.log("Admins API Response:", response.data);
+      setAdmins(Array.isArray(response.data) ? response.data : []); // Faqat massiv kelganda o‘rnatish
     } catch (error) {
       console.error("Error fetching admins:", error);
+      setAdmins([]); // Xatolik bo‘lsa, bo‘sh massiv qo‘yish
     }
   };
+  
+  
 
   const handleUsersClick = () => {
     router.push("/Superadmin");

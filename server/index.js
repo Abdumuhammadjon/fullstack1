@@ -11,12 +11,12 @@ const cors =require('cors')
 const cookieParser = require("cookie-parser")
 const PORT = process.env.PORT || 5000;
 
-const shortcuts = {
-  google: "https://www.google.com",
-  youtube: "https://www.youtube.com",
-  chat: "https://chat.openai.com",
-  sinftest7: "http://localhost:5000" // O'zingizning sayt URL manzilini qo‘ying
-};
+// const shortcuts = {
+//   google: "https://www.google.com",
+//   youtube: "https://www.youtube.com",
+//   chat: "https://chat.openai.com",
+//   sinftest7: "http://localhost:5000" // O'zingizning sayt URL manzilini qo‘ying
+// };
 
 app.use(express.json());
 app.use(
@@ -32,15 +32,17 @@ app.use(helmet());
 app.use("/auth", authRoutes)
 app.use("/api", questions)
 app.use("/api", fanlar)
-app.get("/:shortcut", (req, res) => {
-  console.log("Kelgan shortcut:", req.params.shortcut);
-  const url = shortcuts[req.params.shortcut];
-  if (url) {
-    res.redirect(301, url);
-  } else {
-    res.status(404).send("Bunday qisqa link mavjud emas.");
-  }
-});
+
+
+// app.get("/:shortcut", (req, res) => {
+//   console.log("Kelgan shortcut:", req.params.shortcut);
+//   const url = shortcuts[req.params.shortcut];
+//   if (url) {
+//     res.redirect(301, url);
+//   } else {
+//     res.status(404).send("Bunday qisqa link mavjud emas.");
+//   }
+// });
 
 
 app.get("/", async (req, res) => {
