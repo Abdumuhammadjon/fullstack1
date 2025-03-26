@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   const fetchSubjects = async () => {
     try {
-      const response = await axios.get("http://localhost:5001/subjects");
+      const response = await axios.get("http://localhost:5001/api/subjects");
       setSubjects(response.data);
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -31,31 +31,20 @@ export default function Dashboard() {
   const fetchAdmins = async () => {
     try {
       const response = await axios.get("http://localhost:5001/api/admins");
-      console.log("Admins API Response:", response.data.admins);
-      setAdmins(response.data.admins); // Faqat massiv kelganda o‘rnatish
+      setAdmins(response.data.admins); 
     } catch (error) {
       console.error("Error fetching admins:", error);
-      setAdmins([]); // Xatolik bo‘lsa, bo‘sh massiv qo‘yish
+      setAdmins([]); 
     }
-  };
-  
-  
-
-  const handleUsersClick = () => {
-    router.push("/Superadmin");
-  };
-
-  const handleSubjectClick = () => {
-    router.push("/adminlar");
   };
 
   const addSubject = async () => {
-    if (newSubject.trim() && admin.trim()) {
+    if (newSubject.trim() && admin) {
       try {
         if (editingSubject !== null) {
-          await axios.put(`http://localhost:5001/subjects/${subjects[editingSubject].id}`, { name: newSubject, admin });
+          await axios.put(`http://localhost:5001/api/subjects/${editingSubject}`, { name: newSubject, adminId: admin });
         } else {
-          await axios.post("http://localhost:5001/subjects", { name: newSubject, admin });
+          await axios.post("http://localhost:5001/api/subjects", { name: newSubject, adminId: admin });
         }
         fetchSubjects();
         setNewSubject("");
@@ -67,15 +56,15 @@ export default function Dashboard() {
     }
   };
 
-  const editSubject = (index) => {
-    setNewSubject(subjects[index].name);
-    setAdmin(subjects[index].admin);
-    setEditingSubject(index);
+  const editSubject = (subject) => {
+    setNewSubject(subject.name);
+    setAdmin(subject.adminId);
+    setEditingSubject(subject.id);
   };
 
   const deleteSubject = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/subjects/${id}`);
+      await axios.delete(`http://localhost:5001/api/subjects/${id}`);
       fetchSubjects();
     } catch (error) {
       console.error("Error deleting subject:", error);
@@ -95,20 +84,11 @@ export default function Dashboard() {
           </button>
           {isOpen && <h2 className="text-2xl font-bold mb-6">Dashboard</h2>}
           <ul className="space-y-4">
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Home size={24} /> {isOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg"  onClick={handleSubjectClick}>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" >
-              <Users size={24} /> {isOpen && "Fan yaratish"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
-              <BarChart size={24} /> {isOpen && "Hisobotlar"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
-              <Settings size={24} /> {isOpen && "Sozlamalar"}
             </li>
           </ul>
         </div>
@@ -126,7 +106,7 @@ export default function Dashboard() {
             <select value={admin} onChange={(e) => setAdmin(e.target.value)} className="border p-2 w-full mb-2">
               <option value="">Admin tanlang</option>
               {admins.map((adm) => (
-                <option key={adm.id} value={adm.name}>{adm.email}</option>
+                <option key={adm.id} value={adm.id}>{adm.email}</option>
               ))}
             </select>
             <button 
@@ -139,11 +119,11 @@ export default function Dashboard() {
           <div className="mt-6 p-6 max-w-2xl border rounded">
             <h2 className="text-2xl font-bold mb-4">Yaratilgan fanlar</h2>
             <ul className="space-y-2">
-              {subjects.map((subject, index) => (
+              {subjects.map((subject) => (
                 <li key={subject.id} className="border p-2 flex justify-between items-center">
-                  <span>{subject.name} - Admin: {subject.admin}</span>
+                  <span>{subject.name} - Admin ID: {subject.adminId}</span>
                   <div className="flex gap-2">
-                    <button onClick={() => editSubject(index)} className="text-blue-500">
+                    <button onClick={() => editSubject(subject)} className="text-blue-500">
                       <Edit size={18} />
                     </button>
                     <button onClick={() => deleteSubject(subject.id)} className="text-red-500">
