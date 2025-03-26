@@ -1,7 +1,8 @@
-const { createClient } = require('@supabase/supabase-js');
+const { supabase } = require("../../config/supabaseClient");
+
 require('dotenv').config();
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
 
 
 
@@ -20,7 +21,7 @@ const getAdmins = async (req, res) => {
   }
 };
 
-const { supabase } = require("../config/supabaseClient");
+
 
 // 📌 Yangi fan qo‘shish
 const createSubject = async (req, res) => {
