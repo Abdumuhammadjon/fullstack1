@@ -59,30 +59,69 @@ const login = async (req, res) => {
     if (cachedUserData) {
       user = JSON.parse(cachedUserData);
     } else {
-      const { data, error } = await supabase.from("users").select("id, email, password, role").eq("email", email).single();
-      if (error || !data) return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, email, password, role")
+        .eq("email", email)
+        .single();
+
+      if (error || !data) {
+        return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+      }
+
       user = data;
+
+      // 2️⃣ Foydalanuvchining subjectId sini subjects jadvalidan olish
+      const { data: subjectData, error: subjectError } = await supabase
+        .from("subjects")
+        .select("id")
+        .eq("user_id", user.id)  // users.id orqali subjects dan olamiz
+        .single();
+
+      if (subjectError) {
+        return res.status(500).json({ message: "Fan ma'lumotlari olinmadi!" });
+      }
+
+      user.subjectId = subjectData.id;
+
+      // Redis keshga subjectId bilan saqlash
       await redisClient.setEx(`user-data:${email}`, 3600, JSON.stringify(user));
     }
 
-    // 2️⃣ Parolni tekshirish
+    // 3️⃣ Parolni tekshirish
     const isMatch = user.password && (await bcrypt.compare(password, user.password));
-    if (!isMatch) return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
+    }
 
-    // 3️⃣ Token yaratish
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // 4️⃣ Token yaratish (subjectId qo‘shildi)
+    const tokenPayload = { id: user.id, role: user.role, subjectId: user.subjectId };
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // 4️⃣ Redis’da tokenni saqlash
-    await redisClient.setEx(`user-token:${user.id}`, 3600, token);
+    // 5️⃣ Redis’da token va subjectId ni saqlash
+    await redisClient.setEx(`user-token:${user.id}`, 3600, JSON.stringify({ token, subjectId: user.subjectId }));
 
-    // 5️⃣ Cookie sozlash
-    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict", maxAge: 3600000 });
-    res.status(200).json({ message: "Tizimga muvaffaqiyatli kirdingiz!", token });
+    // 6️⃣ Cookie sozlash
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 3600000,
+    });
+
+    res.status(200).json({ 
+      message: "Tizimga muvaffaqiyatli kirdingiz!", 
+      token,
+      subjectId: user.subjectId 
+    });
+
   } catch (error) {
     console.error("Xatolik:", error);
     res.status(500).json({ message: "Server xatosi!" });
   }
 };
+
+
 
 // 📌 Profil olish
 const getProfile = async (req, res) => {
