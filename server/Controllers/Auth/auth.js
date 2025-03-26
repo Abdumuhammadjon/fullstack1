@@ -65,6 +65,8 @@ const login = async (req, res) => {
         .eq("email", email)
         .single();
 
+        
+
       if (error || !data) {
         return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
       }
@@ -73,10 +75,14 @@ const login = async (req, res) => {
 
       // 2️⃣ Foydalanuvchining subjectId sini subjects jadvalidan olish
       const { data: subjectData, error: subjectError } = await supabase
-        .from("subjects")
-        .select("id")
-        .eq("subjects", id)  // users.id orqali subjects dan olamiz
-        .single();
+      .from("subjects")
+      .select("id")
+      .eq("user_id", user.id) // ✅ user.id orqali subjects jadvalidan olish
+      .single();
+
+      
+        console.log("Subjects dan olingan ma’lumot:", subjectData);
+console.log("Subjects query xatosi:", subjectError);
       
 
       if (subjectError) {
