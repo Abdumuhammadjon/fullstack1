@@ -75,14 +75,16 @@ const login = async (req, res) => {
       const { data: subjectData, error: subjectError } = await supabase
         .from("subjects")
         .select("id")
-        .eq("user_id", user.id)  // users.id orqali subjects dan olamiz
+        .eq("subjects", id)  // users.id orqali subjects dan olamiz
         .single();
+      
 
       if (subjectError) {
         return res.status(500).json({ message: "Fan ma'lumotlari olinmadi!" });
       }
 
       user.subjectId = subjectData.id;
+      
 
       // Redis keshga subjectId bilan saqlash
       await redisClient.setEx(`user-data:${email}`, 3600, JSON.stringify(user));
