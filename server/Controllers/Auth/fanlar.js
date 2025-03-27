@@ -73,12 +73,21 @@ const createSubject = async (req, res) => {
 
 // 📌 Fanlar ro‘yxatini olish
 const getSubjects = async (req, res) => {
-  const { data, error } = await supabase.from("subjects").select("*");
+  try {
+    const { data, error } = await supabase.from("subjects").select("*");
 
-  if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error("Fanlarni olishda xatolik:", error.message);
+      return res.status(500).json({ error: "Fanlar ma'lumotlarini olishda xatolik yuz berdi!" });
+    }
 
-  res.json(data);
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("Server xatosi:", err);
+    res.status(500).json({ error: "Serverda ichki xatolik yuz berdi!" });
+  }
 };
+
 
 // 📌 Fanni yangilash
 const updateSubject = async (req, res) => {
@@ -106,7 +115,35 @@ const deleteSubject = async (req, res) => {
   res.json({ message: "Fan o‘chirildi!" });
 };
 
+// 📌 Berilgan subjectId bo‘yicha savollarni olish
+const getQuestionsBySubject = async (req, res) => {
+  try {
+    const { subjectId } = req.params; // URL params orqali subjectId ni olish
+console.log(subjectId);
+
+    if (!subjectId) {
+      return res.status(400).json({ error: "subjectId talab qilinadi!" });
+    }
+
+    const { data, error } = await supabase
+      .from("questions")
+      .select("*")
+      .eq("subjectId", subjectId); // subjectId bo‘yicha filtr qilish
+
+    if (error) {
+      console.error("Savollarni olishda xatolik:", error.message);
+      return res.status(500).json({ error: "Savollarni olishda xatolik yuz berdi!" });
+    }
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("Server xatosi:", err);
+    res.status(500).json({ error: "Serverda ichki xatolik yuz berdi!" });
+  }
+};
 
 
 
-module.exports = { createSubject, getSubjects, updateSubject, deleteSubject,  getAdmins };
+
+
+module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject,  deleteSubject,  getAdmins };

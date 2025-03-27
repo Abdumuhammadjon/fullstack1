@@ -1,30 +1,29 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function QuestionApp() {
-  const [subjects, setSubjects] = useState([]); // Fanlar ro‘yxati
+  const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [questions, setQuestions] = useState([]); // Backenddan kelgan savollar
+  const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // 1️⃣ Backenddan fanlarni olish
+  // 📌 1️⃣ Backenddan fanlarni olish
   useEffect(() => {
-    fetch("http://localhost:5000/subjects") // Backend API
-      .then((res) => res.json())
-      .then((data) => setSubjects(data))
+    axios.get("http://localhost:5001/api/subjects")
+      .then((res) => setSubjects(res.data))
       .catch((err) => console.error("Fanlarni olishda xatolik:", err));
   }, []);
 
-  // 2️⃣ Tanlangan fan bo‘yicha savollarni olish
+  // 📌 2️⃣ Tanlangan fan bo‘yicha savollarni olish
   useEffect(() => {
     if (!selectedSubject) return;
     setLoading(true);
 
-    fetch(`http://localhost:5000/questions?subject=${selectedSubject}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setQuestions(data);
+    axios.get(`http://localhost:5001/api/subject/${selectedSubject}`)
+      .then((res) => {
+        setQuestions(res.data);
         setLoading(false);
         setAnswers({});
       })
@@ -34,21 +33,19 @@ export default function QuestionApp() {
       });
   }, [selectedSubject]);
 
-  // 3️⃣ Foydalanuvchi javoblarini yig‘ish
+  // 📌 3️⃣ Foydalanuvchi javoblarini yig‘ish
   const handleAnswerChange = (questionId, answer) => {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
-  // 4️⃣ Javoblarni backendga yuborish
+  // 📌 4️⃣ Javoblarni backendga yuborish
   const handleSubmit = () => {
-    fetch("http://localhost:5000/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject: selectedSubject, answers }),
+    axios.post("http://localhost:5001/submit", {
+      subjectId: selectedSubject,
+      answers,
     })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Yuborildi:", data);
+      .then((res) => {
+        console.log("Yuborildi:", res.data);
         setSubmitted(true);
       })
       .catch((err) => console.error("Javoblarni yuborishda xatolik:", err));
@@ -59,7 +56,7 @@ export default function QuestionApp() {
       <div className="bg-white shadow-lg rounded-xl p-6 max-w-lg w-full">
         <h1 className="text-2xl font-semibold mb-4 text-center">Fan bo‘yicha test</h1>
 
-        {/* Fan tanlash select */}
+        {/* 📌 Fan tanlash select */}
         <select
           className="w-full p-3 border rounded-md mb-4"
           value={selectedSubject}
@@ -70,13 +67,13 @@ export default function QuestionApp() {
         >
           <option value="">Fan tanlang</option>
           {subjects.map((subject) => (
-            <option key={subject} value={subject}>
-              {subject}
+            <option key={subject.id} value={subject.id}>
+              {subject.name}
             </option>
           ))}
         </select>
 
-        {/* Savollar yuklanishi */}
+        {/* 📌 Savollar yuklanishi */}
         {loading ? (
           <p className="text-gray-500 text-center">Savollar yuklanmoqda...</p>
         ) : selectedSubject ? (

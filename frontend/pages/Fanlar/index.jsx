@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"; 
+import axios from 'axios'
 import { getSubjects,  updateSubject, deleteSubject, getAdmins } from "../../services/api";
 
 const Subjects = () => {
