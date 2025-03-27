@@ -76,98 +76,18 @@ export default function Admin() {
   };
 
   return (
-    <div className="flex -ml-5 flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100">
       <Head>
         <title>Admin Paneli</title>
         <meta name="description" content="Savollar va variantlar qo‘shish" />
       </Head>
 
-<<<<<<< HEAD
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Savollar Qo‘shish</h1>
-
-      <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 ${isOpen ? "w-64" : "w-20"} flex flex-col`}>
-          <button className="text-white mb-6 focus:outline-none self-end" onClick={() => setIsOpen(!isOpen)}>
-            <Menu size={24} />
-          </button>
-          {isOpen && <h2 className="text-2xl font-bold mb-6">Dashboard</h2>}
-          <ul className="space-y-4">
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
-              <Home size={24} /> {isOpen && "Bosh sahifa"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg"  onClick={handleSubjectClick}>
-              <Users size={24} /> {isOpen && "Foydalanuvchilar"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" >
-              <Users size={24} /> {isOpen && "Fan yaratish"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
-              <BarChart size={24} /> {isOpen && "Hisobotlar"}
-            </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
-              <Settings size={24} /> {isOpen && "Sozlamalar"}
-            </li>
-          </ul>
-        </div>
-
-      {/* Savollar ro‘yxati */}
-      <div className="w-full max-w-3xl space-y-8">
-        {questions.map((question, qIndex) => (
-          <div key={qIndex} className="bg-white p-6 rounded-lg shadow-md relative">
-            {/* Savol inputi */}
-            <input
-              type="text"
-              value={question.questionText}
-              onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-              placeholder={`Savol ${qIndex + 1}`}
-              className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            {/* Variantlar */}
-            <div className="space-y-4">
-              {question.options.map((option, oIndex) => (
-                <div key={oIndex} className="flex items-center space-x-4">
-                  <input
-                    type="text"
-                    value={option.text}
-                    onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
-                    placeholder={`Variant ${oIndex + 1}`}
-                    className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={() => setCorrectOption(qIndex, oIndex)}
-                    className={`px-4 py-2 rounded-lg font-medium transition duration-300 ${
-                      option.isCorrect
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    }`}
-                  >
-                    {option.isCorrect ? 'To‘g‘ri' : 'Belgilash'}
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Delete tugmasi */}
-            <button
-              onClick={() => deleteQuestion(qIndex)}
-              className="absolute top-2 right-2 px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
-            >
-              O‘chirish
-            </button>
-          </div>
-        ))}
-=======
       <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-50 top-0">
         <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
->>>>>>> 62c0ecf52c8a58b127f1e4a00988b5ccdddf1b1f
       </div>
 
-      {isOpen && (
-        <div className="bg-black bg-opacity-50 fixed inset-0 z-40 md:hidden" onClick={() => setIsOpen(false)}></div>
-      )}
-
       <div className="flex flex-1 pt-16">
-        <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 z-50 ${isOpen ? "md:w-64" : "w-20"}`}>
+        <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 ${isOpen ? "w-64" : "w-20"}`}>
           <button className="text-white mb-6" onClick={() => setIsOpen(!isOpen)}>
             <Menu size={24} />
           </button>
@@ -197,27 +117,8 @@ export default function Admin() {
                   onClick={() => deleteQuestion(qIndex)}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
                 >
-                  <Trash size={20} />
+                  <Trash size={24} />
                 </button>
-                <div className="space-y-4">
-                  {question.options.map((option, oIndex) => (
-                    <div key={oIndex} className="flex items-center space-x-4">
-                      <input
-                        type="text"
-                        value={option.text}
-                        onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
-                        placeholder={`Variant ${oIndex + 1}`}
-                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      />
-                      <button
-                        onClick={() => setCorrectOption(qIndex, oIndex)}
-                        className={`px-4 py-2 rounded-lg font-medium ${option.isCorrect ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      >
-                        {option.isCorrect ? 'To‘g‘ri' : 'Belgilash'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
               </div>
             ))}
           </div>

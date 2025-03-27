@@ -77,7 +77,7 @@ const login = async (req, res) => {
       const { data: subjectData, error: subjectError } = await supabase
       .from("subjects")
       .select("id")
-      .eq("user_id", user.id) // ✅ user.id orqali subjects jadvalidan olish
+      .eq("admin", user.id) // ✅ user.id orqali subjects jadvalidan olish
       .single();
 
       
