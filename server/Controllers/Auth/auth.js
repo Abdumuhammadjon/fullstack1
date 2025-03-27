@@ -120,7 +120,8 @@ console.log("Subjects query xatosi:", subjectError);
     res.status(200).json({ 
       message: "Tizimga muvaffaqiyatli kirdingiz!", 
       token,
-      subjectId: user.subjectId 
+      subjectId: user.subjectId,
+      adminId: user.id 
     });
 
   } catch (error) {

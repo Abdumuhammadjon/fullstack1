@@ -46,6 +46,7 @@ const Login = () => {
         }
       );
 localStorage.setItem("SubjectId", res.data.subjectId)
+localStorage.setItem("adminId", res.data.adminId)
       const token = res.data.token;
       if (!token) throw new Error("Token kelmadi!");
 
