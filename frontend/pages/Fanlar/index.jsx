@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; 
 import { getSubjects, createSubject, updateSubject, deleteSubject, getAdmins } from "../../services/api";
 
 const Subjects = () => {
@@ -7,6 +7,7 @@ const Subjects = () => {
   const [admin, setAdmin] = useState("");
   const [admins, setAdmins] = useState([]);
   const [editingSubject, setEditingSubject] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(""); // Xatolik xabarini saqlash uchun
 
   useEffect(() => {
     fetchSubjects();
@@ -32,20 +33,28 @@ const Subjects = () => {
   };
 
   const handleCreateSubject = async () => {
-    if (!newSubject || !admin) return alert("Barcha maydonlarni to‘ldiring!");
+    if (!newSubject || !admin) {
+      setErrorMessage("Barcha maydonlarni to‘ldiring!");
+      return;
+    }
 
     try {
       await createSubject({ name: newSubject, admin });
       setNewSubject("");
+      setAdmin("");
+      setErrorMessage(""); // Xatolikni tozalash
       fetchSubjects();
     } catch (error) {
       console.error("Fan qo‘shishda xatolik:", error);
+      setErrorMessage(error.response?.data?.error || "Noma'lum xatolik yuz berdi!"); // Backenddan kelgan xatolikni chiqarish
     }
   };
 
   const handleUpdateSubject = async () => {
-    if (!editingSubject || !editingSubject.name || !editingSubject.admin)
-      return alert("Barcha maydonlarni to‘ldiring!");
+    if (!editingSubject || !editingSubject.name || !editingSubject.admin) {
+      setErrorMessage("Barcha maydonlarni to‘ldiring!");
+      return;
+    }
 
     try {
       await updateSubject(editingSubject.id, {
@@ -53,9 +62,11 @@ const Subjects = () => {
         admin: editingSubject.admin,
       });
       setEditingSubject(null);
+      setErrorMessage("");
       fetchSubjects();
     } catch (error) {
       console.error("Fan yangilashda xatolik:", error);
+      setErrorMessage(error.response?.data?.error || "Fan yangilashda xatolik yuz berdi!");
     }
   };
 
@@ -67,12 +78,15 @@ const Subjects = () => {
       fetchSubjects();
     } catch (error) {
       console.error("Fan o‘chirishda xatolik:", error);
+      setErrorMessage("Fan o‘chirishda xatolik yuz berdi!");
     }
   };
 
   return (
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">Fanlar</h2>
+
+      {errorMessage && <div className="mb-4 text-red-500">{errorMessage}</div>} {/* Xatolik xabari */}
 
       <div className="mb-4 flex gap-2">
         <input

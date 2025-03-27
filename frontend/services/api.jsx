@@ -13,9 +13,15 @@ export const getSubjects = async () => {
 };
 
 export const createSubject = async (subjectData) => {
-  const response = await axios.post(`${API_URL}/subjects`, subjectData);
-  return response.data;
+  try {
+    const response = await axios.post(`${API_URL}/subjects`, subjectData);
+    return response.data;
+  } catch (error) {
+    console.error("Fan qo‘shishda xatolik:", error.response ? error.response.data : error.message);
+    throw error;
+  }
 };
+
 
 export const updateSubject = async (id, updatedData) => {
   const response = await axios.put(`${API_URL}/subjects/${id}`, updatedData);
