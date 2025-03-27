@@ -1,122 +1,77 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 
-export default function QuestionApp() {
+export default function Home() {
   const [subjects, setSubjects] = useState([]);
-  const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
+  const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
-  // 📌 1️⃣ Backenddan fanlarni olish
   useEffect(() => {
-    axios.get("http://localhost:5001/api/subjects")
-      .then((res) => setSubjects(res.data))
-      .catch((err) => console.error("Fanlarni olishda xatolik:", err));
+    
+    const fetchSubjects = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/subjects");
+        const data = await res.json();
+        setSubjects(data);
+      } catch (error) {
+        console.error("Fanlarni olishda xatolik", error);
+      }
+    };
+    
+    fetchSubjects();
   }, []);
+  console.log(subjects);
+  
 
-  // 📌 2️⃣ Tanlangan fan bo‘yicha savollarni olish
-  useEffect(() => {
-    if (!selectedSubjectId) return;
+  const fetchQuestions = async (subjectId) => {
     setLoading(true);
-
-    axios.get(`http://localhost:5001/api/subject/${selectedSubjectId}`)
-      .then((res) => {
-        setQuestions(res.data);
-        setLoading(false);
-        setAnswers({});
-      })
-      .catch((err) => {
-        console.error("Savollarni olishda xatolik:", err);
-        setLoading(false);
-      });
-  }, [selectedSubjectId]);
-
-  // 📌 3️⃣ Foydalanuvchi javoblarini yig‘ish
-  const handleAnswerChange = (questionId, answer) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: answer }));
+    try {
+      const res = await fetch(`http://localhost:5001/api/subject/${subjectId}`);
+      const data = await res.json();
+      setQuestions(data);
+      setSelectedSubject(subjectId);
+    } catch (error) {
+      console.error("Savollarni olishda xatolik", error);
+    }
+    setLoading(false);
   };
-
-  // 📌 4️⃣ Javoblarni backendga yuborish
-  const handleSubmit = () => {
-    axios.post("http://localhost:5001/submit", {
-      subjectId: selectedSubjectId,
-      answers,
-    })
-      .then((res) => {
-        console.log("Yuborildi:", res.data);
-        setSubmitted(true);
-      })
-      .catch((err) => console.error("Javoblarni yuborishda xatolik:", err));
-  };
+  console.log(selectedSubject);
+  
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white shadow-lg rounded-xl p-6 max-w-lg w-full">
-        <h1 className="text-2xl font-semibold mb-4 text-center">Fan bo‘yicha test</h1>
-
-        {/* 📌 Fan tanlash select */}
-        <select
-          className="w-full p-3 border rounded-md mb-4"
-          value={selectedSubjectId}
-          onChange={(e) => {
-            setSelectedSubjectId(e.target.value);
-            setSubmitted(false);
-          }}
-        >
-          <option value="">Fan tanlang</option>
-          {subjects.map((subject) => (
-            <option key={subject.id} value={subject.id}>
-              {subject.name}
-            </option>
-          ))}
-        </select>
-
-        {/* 📌 Savollar yuklanishi */}
-        {loading ? (
-          <p className="text-gray-500 text-center">Savollar yuklanmoqda...</p>
-        ) : selectedSubjectId ? (
-          questions.length > 0 ? (
-            <div className="space-y-4">
-              {questions.map((q) => (
-                <div key={q.id} className="p-4 border rounded-md">
-                  <p className="font-medium">{q.question}</p>
-                  {q.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name={`question-${q.id}`}
-                        value={option}
-                        className="h-4 w-4"
-                        onChange={() => handleAnswerChange(q.id, option)}
-                      />
-                      <label>{option}</label>
-                    </div>
-                  ))}
-                </div>
-              ))}
-
-              <button
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 mt-4"
-                onClick={handleSubmit}
-              >
-                Yuborish
-              </button>
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center">Bu fan bo‘yicha savollar yo‘q.</p>
-          )
-        ) : (
-          <p className="text-gray-500 text-center">Iltimos, fanni tanlang.</p>
-        )}
-
-        {submitted && (
-          <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-600 rounded-md">
-            <p className="text-green-700">Javoblar muvaffaqiyatli yuborildi!</p>
-          </div>
-        )}
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+      <h1 className="text-3xl font-bold text-blue-700 mb-6">Fanlar ro‘yxati</h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-4xl">
+        {subjects.map((subject) => (
+          <button
+            key={subject.id}
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition"
+            onClick={() => fetchQuestions(subject.id)}
+          >
+            {subject.id}
+          </button>
+        ))}
       </div>
+
+      {loading && <p className="text-gray-700 mt-4">Yuklanmoqda...</p>}
+
+      {selectedSubject && (
+        <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Savollar</h2>
+          <ul className="space-y-4">
+            {questions.map((question) => (
+              <li key={question.id} className="p-4 border-b">
+                <p className="font-bold text-lg text-gray-900">{question.text}</p>
+                <ul className="mt-2 space-y-2">
+                  {question.options.map((option, index) => (
+                    <li key={index} className="ml-4 p-2 bg-gray-200 rounded-lg">{option}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
