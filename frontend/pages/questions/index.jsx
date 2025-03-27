@@ -11,14 +11,20 @@ export default function Admin() {
   const [adminId, setAdminId] = useState(null);
 
   useEffect(() => {
-    const adminId = localStorage.getItem("adminId")
-    const subjectId = localStorage.getItem("subjectId")
-   
-    
-    setSubjectId(Cookies.get(subjectId));
-    setAdminId(Cookies.get(adminId));
+    const storedAdminId = localStorage.getItem("adminId");
+    const storedSubjectId = localStorage.getItem("subjectId");
+  
+    console.log("Admin ID:", storedAdminId);
+    console.log("Subject ID:", storedSubjectId);
+  
+    if (!storedAdminId || !storedSubjectId) {
+      alert("Subject ID yoki Admin ID yo‘q!");
+    }
+  
+    setSubjectId(storedSubjectId);
+    setAdminId(storedAdminId);
   }, []);
-  console.log(adminId);
+  
   
 
   const addQuestion = () => {
@@ -64,6 +70,7 @@ export default function Admin() {
   const saveQuestions = async () => {
     const adminId = localStorage.getItem("adminId")
     const subjectId = localStorage.getItem("subjectId")
+   console.log(subjectId);
    
     if (!subjectId || !adminId) {
       alert('Subject ID yoki Admin ID topilmadi!');
