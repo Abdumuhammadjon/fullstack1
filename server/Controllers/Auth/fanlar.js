@@ -118,7 +118,7 @@ const deleteSubject = async (req, res) => {
 // 📌 Berilgan subjectId bo‘yicha savollarni olish
 const getQuestionsBySubject = async (req, res) => {
   try {
-    const { subjectId } = req.params; // URL params orqali subjectId ni olish
+    const subjectId  = req.params; // URL params orqali subjectId ni olish
 console.log(subjectId);
 
     if (!subjectId) {
@@ -128,7 +128,7 @@ console.log(subjectId);
     const { data, error } = await supabase
       .from("questions")
       .select("*")
-      .eq("subjectId", subjectId); // subjectId bo‘yicha filtr qilish
+      .eq("subject_id", subjectId); // subjectId bo‘yicha filtr qilish
 
     if (error) {
       console.error("Savollarni olishda xatolik:", error.message);
