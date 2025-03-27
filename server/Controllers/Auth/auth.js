@@ -65,32 +65,28 @@ const login = async (req, res) => {
         .eq("email", email)
         .single();
 
-        
-
       if (error || !data) {
         return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
       }
 
       user = data;
 
-      // 2️⃣ Foydalanuvchining subjectId sini subjects jadvalidan olish
-      const { data: subjectData, error: subjectError } = await supabase
-      .from("subjects")
-      .select("id")
-      .eq("admin", user.id) // ✅ user.id orqali subjects jadvalidan olish
-      .single();
+      // 🔹 Faqat **admin** bo‘lsa `subjectId` ni olish
+      if (user.role === "admin") {
+        const { data: subjectData, error: subjectError } = await supabase
+          .from("subjects")
+          .select("id")
+          .eq("admin", user.id) 
+          .single();
 
-      
-        console.log("Subjects dan olingan ma’lumot:", subjectData);
-console.log("Subjects query xatosi:", subjectError);
-      
-
-      if (subjectError) {
-        return res.status(500).json({ message: "Fan ma'lumotlari olinmadi!" });
+        if (!subjectError && subjectData) {
+          user.subjectId = subjectData.id;
+        } else {
+          user.subjectId = null; // Admin bo‘lsa ham subjectId bo‘lmasligi mumkin
+        }
+      } else {
+        user.subjectId = null; // Oddiy foydalanuvchilarga subjectId kerak emas
       }
-
-      user.subjectId = subjectData.id;
-      
 
       // Redis keshga subjectId bilan saqlash
       await redisClient.setEx(`user-data:${email}`, 3600, JSON.stringify(user));
@@ -102,12 +98,16 @@ console.log("Subjects query xatosi:", subjectError);
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // 4️⃣ Token yaratish (subjectId qo‘shildi)
-    const tokenPayload = { id: user.id, role: user.role, subjectId: user.subjectId };
+    // 4️⃣ Token yaratish (faqat admin bo‘lsa subjectId qo‘shiladi)
+    const tokenPayload = { id: user.id, role: user.role };
+    if (user.role === "admin" && user.subjectId) {
+      tokenPayload.subjectId = user.subjectId;
+    }
+    
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     // 5️⃣ Redis’da token va subjectId ni saqlash
-    await redisClient.setEx(`user-token:${user.id}`, 3600, JSON.stringify({ token, subjectId: user.subjectId }));
+    await redisClient.setEx(`user-token:${user.id}`, 3600, JSON.stringify({ token, subjectId: user.subjectId || null }));
 
     // 6️⃣ Cookie sozlash
     res.cookie("token", token, {
@@ -120,7 +120,7 @@ console.log("Subjects query xatosi:", subjectError);
     res.status(200).json({ 
       message: "Tizimga muvaffaqiyatli kirdingiz!", 
       token,
-      subjectId: user.subjectId,
+      subjectId: user.subjectId || undefined, // Agar admin bo‘lmasa, subjectId qaytarilmaydi
       adminId: user.id 
     });
 
@@ -129,6 +129,7 @@ console.log("Subjects query xatosi:", subjectError);
     res.status(500).json({ message: "Server xatosi!" });
   }
 };
+
 
 
 
