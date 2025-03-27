@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"; 
-import { getSubjects, createSubject, updateSubject, deleteSubject, getAdmins } from "../../services/api";
+import { getSubjects,  updateSubject, deleteSubject, getAdmins } from "../../services/api";
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -13,6 +13,9 @@ const Subjects = () => {
     fetchSubjects();
     fetchAdmins();
   }, []);
+
+
+  const API_URL = "http://localhost:5001/api"; // Backend server manzili
 
   const fetchSubjects = async () => {
     try {
@@ -33,22 +36,35 @@ const Subjects = () => {
   };
 
   const handleCreateSubject = async () => {
-    if (!newSubject || !admin) {
+    if (!newSubject.trim() || !admin.trim()) {
       setErrorMessage("Barcha maydonlarni to‘ldiring!");
       return;
     }
-
+  
+    const subjectData = { name: newSubject.trim(), admin: admin.trim() };
+    console.log("Yuborilayotgan ma'lumot:", subjectData);
+  
     try {
-      await createSubject({ name: newSubject, admin });
+      const response = await axios.post(`${API_URL}/subjects`, subjectData);
+      console.log("Fan yaratildi:", response.data);
+  
       setNewSubject("");
       setAdmin("");
-      setErrorMessage(""); // Xatolikni tozalash
-      fetchSubjects();
+      setErrorMessage(""); 
+      fetchSubjects(); 
     } catch (error) {
-      console.error("Fan qo‘shishda xatolik:", error);
-      setErrorMessage(error.response?.data?.error || "Noma'lum xatolik yuz berdi!"); // Backenddan kelgan xatolikni chiqarish
+      console.error("Fan qo‘shishda xatolik:", error.response ? error.response.data : error.message);
+  
+      if (error.response?.data?.error) {
+        setErrorMessage(error.response.data.error);
+      } else if (error.response?.status === 400) {
+        setErrorMessage("Noto‘g‘ri so‘rov! Ma’lumotlarni tekshiring.");
+      } else {
+        setErrorMessage("Noma'lum xatolik yuz berdi!");
+      }
     }
   };
+  ;
 
   const handleUpdateSubject = async () => {
     if (!editingSubject || !editingSubject.name || !editingSubject.admin) {
