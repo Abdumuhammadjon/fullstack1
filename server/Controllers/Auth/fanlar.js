@@ -129,7 +129,7 @@ console.log(id);
     const { data: questions, error: questionsError } = await supabase
       .from("questions")
       .select("id, text")
-      .eq("subject_id", id)
+      .eq("subject_id", subjectId);
 
     if (questionsError) {
       return res.status(500).json({ error: "Savollarni olishda xatolik!" });
@@ -140,7 +140,7 @@ console.log(id);
       const { data: options, error: optionsError } = await supabase
         .from("options")
         .select("id, text")
-        .eq("id", question.id);
+        .eq("question_id", question_id);
 
       if (optionsError) {
         return res.status(500).json({ error: "Variantlarni olishda xatolik!" });
