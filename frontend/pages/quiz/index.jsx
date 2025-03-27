@@ -3,7 +3,7 @@ import axios from "axios";
 
 export default function QuestionApp() {
   const [subjects, setSubjects] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
@@ -18,10 +18,10 @@ export default function QuestionApp() {
 
   // 📌 2️⃣ Tanlangan fan bo‘yicha savollarni olish
   useEffect(() => {
-    if (!selectedSubject) return;
+    if (!selectedSubjectId) return;
     setLoading(true);
 
-    axios.get(`http://localhost:5001/api/subject/${selectedSubject}`)
+    axios.get(`http://localhost:5001/api/subject/${selectedSubjectId}`)
       .then((res) => {
         setQuestions(res.data);
         setLoading(false);
@@ -31,7 +31,7 @@ export default function QuestionApp() {
         console.error("Savollarni olishda xatolik:", err);
         setLoading(false);
       });
-  }, [selectedSubject]);
+  }, [selectedSubjectId]);
 
   // 📌 3️⃣ Foydalanuvchi javoblarini yig‘ish
   const handleAnswerChange = (questionId, answer) => {
@@ -41,7 +41,7 @@ export default function QuestionApp() {
   // 📌 4️⃣ Javoblarni backendga yuborish
   const handleSubmit = () => {
     axios.post("http://localhost:5001/submit", {
-      subjectId: selectedSubject,
+      subjectId: selectedSubjectId,
       answers,
     })
       .then((res) => {
@@ -59,9 +59,9 @@ export default function QuestionApp() {
         {/* 📌 Fan tanlash select */}
         <select
           className="w-full p-3 border rounded-md mb-4"
-          value={selectedSubject}
+          value={selectedSubjectId}
           onChange={(e) => {
-            setSelectedSubject(e.target.value);
+            setSelectedSubjectId(e.target.value);
             setSubmitted(false);
           }}
         >
@@ -76,7 +76,7 @@ export default function QuestionApp() {
         {/* 📌 Savollar yuklanishi */}
         {loading ? (
           <p className="text-gray-500 text-center">Savollar yuklanmoqda...</p>
-        ) : selectedSubject ? (
+        ) : selectedSubjectId ? (
           questions.length > 0 ? (
             <div className="space-y-4">
               {questions.map((q) => (
