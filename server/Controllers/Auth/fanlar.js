@@ -118,27 +118,40 @@ const deleteSubject = async (req, res) => {
 // 📌 Berilgan subjectId bo‘yicha savollarni olish
 const getQuestionsBySubject = async (req, res) => {
   try {
-    const subjectId  = req.params; // URL params orqali subjectId ni olish
-console.log(subjectId);
+    const  {id}  = req.params;
+console.log(id);
 
-    if (!subjectId) {
+    if (!id) {
       return res.status(400).json({ error: "subjectId talab qilinadi!" });
     }
 
-    const { data, error } = await supabase
+    // Savollarni olish
+    const { data: questions, error: questionsError } = await supabase
       .from("questions")
-      .select("*")
-      .eq("subject_id", subjectId); // subjectId bo‘yicha filtr qilish
+      .select("id, text")
+      .eq("subject_id", id)
 
-    if (error) {
-      console.error("Savollarni olishda xatolik:", error.message);
-      return res.status(500).json({ error: "Savollarni olishda xatolik yuz berdi!" });
+    if (questionsError) {
+      return res.status(500).json({ error: "Savollarni olishda xatolik!" });
     }
 
-    res.status(200).json(data);
+    // Har bir savolning variantlarini olish
+    for (let question of questions) {
+      const { data: options, error: optionsError } = await supabase
+        .from("options")
+        .select("id, text")
+        .eq("question_id", question.id);
+
+      if (optionsError) {
+        return res.status(500).json({ error: "Variantlarni olishda xatolik!" });
+      }
+
+      question.options = options;
+    }
+
+    res.status(200).json(questions);
   } catch (err) {
-    console.error("Server xatosi:", err);
-    res.status(500).json({ error: "Serverda ichki xatolik yuz berdi!" });
+    res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
 
