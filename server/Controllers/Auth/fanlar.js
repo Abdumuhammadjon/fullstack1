@@ -140,7 +140,7 @@ console.log(id);
       const { data: options, error: optionsError } = await supabase
         .from("options")
         .select("id, text")
-        .eq("question_id", question.id);
+        .eq("id", question.id);
 
       if (optionsError) {
         return res.status(500).json({ error: "Variantlarni olishda xatolik!" });
