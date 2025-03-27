@@ -81,6 +81,30 @@ export default function Admin() {
 
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Savollar Qo‘shish</h1>
 
+      <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 ${isOpen ? "w-64" : "w-20"} flex flex-col`}>
+          <button className="text-white mb-6 focus:outline-none self-end" onClick={() => setIsOpen(!isOpen)}>
+            <Menu size={24} />
+          </button>
+          {isOpen && <h2 className="text-2xl font-bold mb-6">Dashboard</h2>}
+          <ul className="space-y-4">
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" onClick={handleUsersClick}>
+              <Home size={24} /> {isOpen && "Bosh sahifa"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg"  onClick={handleSubjectClick}>
+              <Users size={24} /> {isOpen && "Foydalanuvchilar"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg" >
+              <Users size={24} /> {isOpen && "Fan yaratish"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+              <BarChart size={24} /> {isOpen && "Hisobotlar"}
+            </li>
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+              <Settings size={24} /> {isOpen && "Sozlamalar"}
+            </li>
+          </ul>
+        </div>
+
       {/* Savollar ro‘yxati */}
       <div className="w-full max-w-3xl space-y-8">
         {questions.map((question, qIndex) => (
