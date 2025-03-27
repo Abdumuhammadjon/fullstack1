@@ -11,9 +11,15 @@ export default function Admin() {
   const [adminId, setAdminId] = useState(null);
 
   useEffect(() => {
-    setSubjectId(Cookies.get('subjectId'));
-    setAdminId(Cookies.get('adminId'));
+    const adminId = localStorage.getItem("adminId")
+    const subjectId = localStorage.getItem("subjectId")
+   
+    
+    setSubjectId(Cookies.get(subjectId));
+    setAdminId(Cookies.get(adminId));
   }, []);
+  console.log(adminId);
+  
 
   const addQuestion = () => {
     setQuestions([
@@ -56,6 +62,9 @@ export default function Admin() {
   };
 
   const saveQuestions = async () => {
+    const adminId = localStorage.getItem("adminId")
+    const subjectId = localStorage.getItem("subjectId")
+   
     if (!subjectId || !adminId) {
       alert('Subject ID yoki Admin ID topilmadi!');
       return;
