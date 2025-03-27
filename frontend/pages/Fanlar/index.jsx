@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"; 
-import { getSubjects, createSubject, updateSubject, deleteSubject, getAdmins } from "../../services/api";
+import { getSubjects,  updateSubject, deleteSubject, getAdmins } from "../../services/api";
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -33,22 +33,39 @@ const Subjects = () => {
   };
 
   const handleCreateSubject = async () => {
-    if (!newSubject || !admin) {
+    // 1. Foydalanuvchi barcha maydonlarni to‘ldirganini tekshiramiz
+    if (!newSubject.trim() || !admin.trim()) {
       setErrorMessage("Barcha maydonlarni to‘ldiring!");
       return;
     }
-
+  
+    const subjectData = { name: newSubject.trim(), admin: admin.trim() };
+    console.log("Yuborilayotgan ma'lumot:", subjectData); // Yuborilayotgan ma'lumotni tekshirish
+  
     try {
-      await createSubject({ name: newSubject, admin });
+      // 2. API so‘rovini yuboramiz
+      const response = await createSubject(subjectData);
+      console.log("Fan yaratildi:", response); // Muvaffaqiyatli javobni tekshiramiz
+  
+      // 3. Ma'lumotlarni tozalash
       setNewSubject("");
       setAdmin("");
-      setErrorMessage(""); // Xatolikni tozalash
-      fetchSubjects();
+      setErrorMessage(""); 
+      fetchSubjects(); // Ro‘yxatni yangilash
     } catch (error) {
-      console.error("Fan qo‘shishda xatolik:", error);
-      setErrorMessage(error.response?.data?.error || "Noma'lum xatolik yuz berdi!"); // Backenddan kelgan xatolikni chiqarish
+      // 4. Xatolikni aniq chiqaramiz
+      console.error("Fan qo‘shishda xatolik:", error.response?.data || error.message);
+      
+      if (error.response?.data?.error) {
+        setErrorMessage(error.response.data.error); // Backend xabarini chiqarish
+      } else if (error.response?.status === 400) {
+        setErrorMessage("Noto‘g‘ri so‘rov! Ma’lumotlarni tekshiring.");
+      } else {
+        setErrorMessage("Noma'lum xatolik yuz berdi!");
+      }
     }
   };
+  
 
   const handleUpdateSubject = async () => {
     if (!editingSubject || !editingSubject.name || !editingSubject.admin) {
