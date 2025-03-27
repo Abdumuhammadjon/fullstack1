@@ -45,7 +45,7 @@ const Login = () => {
           withCredentials: true, // 🍪 Cookie’ni qabul qilish
         }
       );
-
+localStorage.setItem("SubjectId", res.data.subjectId)
       const token = res.data.token;
       if (!token) throw new Error("Token kelmadi!");
 
