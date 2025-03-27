@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Menu, Home, Users, BarChart, Settings, Trash } from 'lucide-react';
+import { Menu, Home, Users, BarChart, Settings, Trash, CheckCircle } from 'lucide-react';
 
 export default function Admin() {
   const [questions, setQuestions] = useState([]);
@@ -119,6 +119,25 @@ export default function Admin() {
                 >
                   <Trash size={24} />
                 </button>
+                <div className="space-y-2">
+                  {question.options.map((option, oIndex) => (
+                    <div key={oIndex} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={option.text}
+                        onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
+                        placeholder={`Variant ${oIndex + 1}`}
+                        className="flex-1 p-2 border rounded-lg"
+                      />
+                      <button
+                        onClick={() => setCorrectOption(qIndex, oIndex)}
+                        className={`p-2 rounded-lg ${option.isCorrect ? "bg-green-500 text-white" : "bg-gray-300 text-gray-700"}`}
+                      >
+                        <CheckCircle size={20} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
