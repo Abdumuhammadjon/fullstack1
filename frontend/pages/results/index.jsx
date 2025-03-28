@@ -3,6 +3,7 @@ import axios from "axios";
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Noma'lum sana";
   return date.toLocaleDateString('en', {
     day: '2-digit', month: 'long', year: 'numeric'
   });
@@ -12,6 +13,7 @@ const groupResultsByDate = (results) => {
   const grouped = {};
   results.forEach(result => {
     const date = new Date(result.date);
+    if (isNaN(date.getTime())) return; // Invalid date check
     const key = date.toISOString().slice(0, 10);
     if (!grouped[key]) {
       grouped[key] = [];
