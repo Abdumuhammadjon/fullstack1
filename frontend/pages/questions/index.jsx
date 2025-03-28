@@ -92,7 +92,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex -ml-5  flex-col h-screen bg-gray-100">
       <Head>
         <title>Admin Paneli</title>
         <meta name="description" content="Savollar va variantlar qo‘shish" />
