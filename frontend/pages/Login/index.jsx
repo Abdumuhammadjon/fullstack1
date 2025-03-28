@@ -59,7 +59,7 @@ localStorage.setItem("adminId", res.data.adminId)
       if (decoded.role === "admin") {
         router.push("/questions");
       } else {
-        router.push("/");
+        router.push("/quiz");
       }
 
       console.log("✅ Login successful:", res.data.subjectId);
