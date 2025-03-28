@@ -173,6 +173,50 @@ const getQuestionsBySubject = async (req, res) => {
 };
 
 
+// Backendda (Express.js bilan)
+// app.post("/api/submit-answers", async (req, res) => {
+//   try {
+//     // Frontenddan kelgan ma'lumotlarni olish
+//     const { subject_id, answers } = req.body;
+
+//     // Ma'lumotlarni tekshirish
+//     if (!subject_id || !answers || !answers.length) {
+//       return res.status(400).json({ error: "subject_id va answers talab qilinadi!" });
+//     }
+
+//     // Foydalanuvchi ID sini olish (agar autentifikatsiya bo'lsa)
+//     // Agar autentifikatsiya yo'q bo'lsa, bu qismni o'chirib tashlash mumkin
+//     const user_id = req.user?.id; // req.user autentifikatsiya middleware orqali keladi
+//     if (!user_id) {
+//       return res.status(401).json({ error: "Foydalanuvchi autentifikatsiyasi talab qilinadi!" });
+//     }
+
+//     // Ma'lumotlarni Supabase'dagi user_answers jadvaliga yozish
+//     const insertPromises = answers.map(async (answer) => {
+//       const { error } = await supabase.from("user_answers").insert({
+//         subject_id: subject_id,
+//         question_id: answer.question_id,
+//         option_id: answer.option_id,
+//         user_id: user_id, // Foydalanuvchi ID si
+//         created_at: new Date().toISOString(), // Yaratilgan vaqt (agar jadvalda bo'lsa)
+//       });
+
+//       if (error) {
+//         throw new Error(`Javobni saqlashda xatolik: ${error.message}`);
+//       }
+//     });
+
+//     // Barcha insert operatsiyalarini bajarish
+//     await Promise.all(insertPromises);
+
+//     // Muvaffaqiyatli javob qaytarish
+//     return res.status(200).json({ message: "Javoblar muvaffaqiyatli saqlandi!" });
+//   } catch (err) {
+//     console.error("Javoblarni saqlashda xatolik:", err);
+//     return res.status(500).json({ error: "Javoblarni saqlashda xatolik yuz berdi!" });
+//   }
+// });
+
 
 
 module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject,  deleteSubject,  getAdmins };
