@@ -32,7 +32,7 @@ export default function UserResults() {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:5001/api/user-results");
+        const response = await axios.get("http://localhost:5001/api/subject");
         setResults(response.data);
         setGroupedResults(groupResultsByDate(response.data));
       } catch (error) {
