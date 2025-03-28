@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useRouter } from "next/router";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Menu, Home, Users, BarChart, Settings, Trash, CheckCircle } from 'lucide-react';
@@ -9,6 +10,7 @@ export default function Admin() {
   const [isOpen, setIsOpen] = useState(false);
   const [subjectId, setSubjectId] = useState(null);
   const [adminId, setAdminId] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const storedAdminId = localStorage.getItem("adminId");
@@ -25,7 +27,9 @@ export default function Admin() {
     setAdminId(storedAdminId);
   }, []);
   
-  
+  const handleSubjectClick = () => {
+    router.push("/results");
+  };
 
   const addQuestion = () => {
     setQuestions([
@@ -108,8 +112,8 @@ export default function Admin() {
             <Menu size={24} />
           </button>
           <ul className="space-y-4">
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Home size={24} /> {isOpen && "Bosh sahifa"}</li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Users size={24} /> {isOpen && "Foydalanuvchilar"}</li>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Home size={24}  /> {isOpen && "Bosh sahifa"}</li>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Users size={24}  onClick={handleUsersClick}/> {isOpen && "Foydalanuvchilar" }</li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><BarChart size={24} /> {isOpen && "Hisobotlar"}</li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Settings size={24} /> {isOpen && "Sozlamalar"}</li>
           </ul>
