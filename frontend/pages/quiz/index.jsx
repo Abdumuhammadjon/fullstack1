@@ -7,7 +7,7 @@ export default function Home() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  console.log(questions);
   useEffect(() => {
     const fetchSubjects = async () => {
       setLoading(true);
@@ -38,7 +38,8 @@ export default function Home() {
       setLoading(false);
     }
   };
-  log
+ 
+  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
