@@ -31,8 +31,9 @@ export default function UserResults() {
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
+      const subjectId = localStorage.getItem("subjectId")
       try {
-        const response = await axios.get("http://localhost:5001/api/subject");
+        const response = await axios.get(`http://localhost:5001/api/subject/${subjectId}`);
         setResults(response.data);
         setGroupedResults(groupResultsByDate(response.data));
       } catch (error) {
