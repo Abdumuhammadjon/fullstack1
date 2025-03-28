@@ -130,7 +130,7 @@ const getQuestionsBySubject = async (req, res) => {
     // subject_id ga mos keladigan savollar va ularning faqat id va question_text ni olamiz
     const { data: questions, error: questionsError } = await supabase
       .from("questions")
-      .select("id, question_text") // question_text jadvalda shunday nomlangan
+      .select("id, question_text, created_at") // question_text jadvalda shunday nomlangan
       .eq("subject_id", id);
 
     // 4. Agar savollarni olishda xatolik bo'lsa, xato qaytarish
