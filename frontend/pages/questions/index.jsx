@@ -11,7 +11,10 @@ export default function Admin() {
   const [subjectId, setSubjectId] = useState(null);
   const [adminId, setAdminId] = useState(null);
   const router = useRouter();
-
+  
+  const handleSubjectClick = () => {
+    router.push("/results");
+  };
   useEffect(() => {
     const storedAdminId = localStorage.getItem("adminId");
     const storedSubjectId = localStorage.getItem("subjectId");
@@ -27,9 +30,6 @@ export default function Admin() {
     setAdminId(storedAdminId);
   }, []);
   
-  const handleSubjectClick = () => {
-    router.push("/results");
-  };
 
   const addQuestion = () => {
     setQuestions([
