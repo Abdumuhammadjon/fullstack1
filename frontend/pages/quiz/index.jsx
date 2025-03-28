@@ -7,7 +7,8 @@ export default function Home() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  console.log(questions);
+
+  // Fanlarni olish
   useEffect(() => {
     const fetchSubjects = async () => {
       setLoading(true);
@@ -16,30 +17,31 @@ export default function Home() {
         setSubjects(response.data);
       } catch (error) {
         console.error("Fanlarni olishda xatolik:", error);
-        setError(error.response?.data?.message || "Fanlarni yuklashda xatolik yuz berdi");
+        setError(error.response?.data?.error || "Fanlarni yuklashda xatolik yuz berdi");
       } finally {
         setLoading(false);
       }
     };
+
     fetchSubjects();
   }, []);
 
+  // Savollarni olish
   const fetchQuestions = async (subjectId) => {
     setLoading(true);
     setError(null);
     try {
+      // Backenddagi endpointga moslashtirildi
       const response = await axios.get(`http://localhost:5001/api/subject/${subjectId}`);
       setQuestions(response.data);
       setSelectedSubject(subjectId);
     } catch (error) {
       console.error("Savollarni olishda xatolik:", error);
-      setError(error.response?.data?.message || "Savollarni yuklashda xatolik yuz berdi");
+      setError(error.response?.data?.error || "Savollarni yuklashda xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
   };
- 
-  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
@@ -71,12 +73,17 @@ export default function Home() {
           <ul className="space-y-4">
             {questions.map((question) => (
               <li key={question.id} className="p-4 border-b">
-                <p className="font-bold text-lg text-gray-900">{question.text}</p>
+                {/* Backendda question_text ishlatilgan */}
+                <p className="font-bold text-lg text-gray-900">{question.question_text}</p>
                 {question.options?.length > 0 ? (
                   <ul className="mt-2 space-y-2">
                     {question.options.map((option) => (
-                      <li key={option.id} className="ml-4 p-2 bg-gray-200 rounded-lg">
-                        {option.text}
+                      <li
+                        key={option.id}
+                         // To'g'ri javobni yashil rangda ko'rsatish
+                      >
+                        {/* Backendda option_text ishlatilgan */}
+                        {option.option_text}
                       </li>
                     ))}
                   </ul>
