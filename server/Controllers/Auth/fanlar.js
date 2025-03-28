@@ -115,46 +115,60 @@ const deleteSubject = async (req, res) => {
   res.json({ message: "Fan o‘chirildi!" });
 };
 
-// 📌 Berilgan subjectId bo‘yicha savollarni olish
 const getQuestionsBySubject = async (req, res) => {
   try {
-    const  {id}  = req.params;
-console.log(id);
+    // 1. Frontenddan kelgan subject ID ni olish
+    const { id } = req.params;
+    console.log("Kelgan subject ID:", id);
 
+    // 2. Agar ID kelmagan bo'lsa, xato qaytarish
     if (!id) {
       return res.status(400).json({ error: "subjectId talab qilinadi!" });
     }
 
-    // Savollarni olish
+    // 3. Questions jadvalidan savollarni olish
+    // subject_id ga mos keladigan savollar va ularning faqat id va question_text ni olamiz
     const { data: questions, error: questionsError } = await supabase
       .from("questions")
-      .select("id, text")
-      .eq("subject_id", subjectId);
+      .select("id, question_text") // question_text jadvalda shunday nomlangan
+      .eq("subject_id", id);
 
+    // 4. Agar savollarni olishda xatolik bo'lsa, xato qaytarish
     if (questionsError) {
+      console.error("Savollarni olishda xatolik:", questionsError);
       return res.status(500).json({ error: "Savollarni olishda xatolik!" });
     }
 
-    // Har bir savolning variantlarini olish
+    // 5. Agar savollar bo'lmasa, bo'sh ro'yxat qaytarish
+    if (!questions || questions.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // 6. Har bir savol uchun options jadvalidan variantlarni olish
     for (let question of questions) {
       const { data: options, error: optionsError } = await supabase
         .from("options")
-        .select("id, text")
-        .eq("question_id", question_id);
+        .select("id, option_text, is_correct") // option_text va is_correct ni olamiz
+        .eq("question_id", question.id); // question.id orqali variantlarni filtrlaymiz
 
+      // 7. Agar variantlarni olishda xatolik bo'lsa, xato qaytarish
       if (optionsError) {
+        console.error("Variantlarni olishda xatolik:", optionsError);
         return res.status(500).json({ error: "Variantlarni olishda xatolik!" });
       }
 
-      question.options = options;
+      // 8. Savol obyektiga variantlarni qo'shish
+      question.options = options || []; // Agar variantlar bo'lmasa bo'sh array
     }
 
-    res.status(200).json(questions);
+    // 9. Natijani frontendga yuborish
+    return res.status(200).json(questions);
   } catch (err) {
-    res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
+    // 10. Umumiy xatolik bo'lsa, server xatosi qaytarish
+    console.error("Server xatosi:", err);
+    return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
-
 
 
 
