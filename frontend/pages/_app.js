@@ -31,7 +31,7 @@ export default function App({ Component, pageProps }) {
       } catch (error) {
         console.error("Xatolik:", error.response?.data || error.message);
         setUser(null);
-        router.push('/login'); // Xatolik bo'lsa ham login sahifasiga yo'naltirish
+        router.push('/Login'); // Xatolik bo'lsa ham login sahifasiga yo'naltirish
       }
     };
 
