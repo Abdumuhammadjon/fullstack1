@@ -12,25 +12,28 @@ export default function Admin() {
   const [adminId, setAdminId] = useState(null);
   const router = useRouter();
   
-  const handleSubjectClick = () => {
-    router.push("/results");
-  };
+  
+  
+  
   useEffect(() => {
     const storedAdminId = localStorage.getItem("adminId");
     const storedSubjectId = localStorage.getItem("subjectId");
-  
+    
     console.log("Admin ID:", storedAdminId);
     console.log("Subject ID:", storedSubjectId);
-  
+    
     if (!storedAdminId || !storedSubjectId) {
       alert("Subject ID yoki Admin ID yo‘q!");
     }
-  
+    
     setSubjectId(storedSubjectId);
     setAdminId(storedAdminId);
   }, []);
   
-
+  const handleSubjectClick = () => {
+    router.push("/results");
+  };
+  
   const addQuestion = () => {
     setQuestions([
       ...questions,
@@ -113,7 +116,7 @@ export default function Admin() {
           </button>
           <ul className="space-y-4">
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Home size={24}  /> {isOpen && "Bosh sahifa"}</li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Users size={24}  onClick={handleSubjectClick}/> {isOpen && "Foydalanuvchilar" }</li>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"  onClick={handleSubjectClick} ><Users size={24}  /> {isOpen && "Foydalanuvchilar" }</li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><BarChart size={24} /> {isOpen && "Hisobotlar"}</li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Settings size={24} /> {isOpen && "Sozlamalar"}</li>
           </ul>
