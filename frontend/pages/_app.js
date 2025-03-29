@@ -25,7 +25,7 @@ App.getInitialProps = async ({ Component, ctx }) => {
   const { asPath } = ctx;
   let user = null;
   try {
-    const response = await Axios.get("http://localhost:5001/auth/profile", {
+    const response = await Axios.get("http://localhost:5001/auth/profile", { withCredentials: true }, {
       headers: {
         cookie: ctx?.req?.headers?.cookie,
       },
