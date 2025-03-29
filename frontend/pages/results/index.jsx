@@ -1,87 +1,103 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Noma'lum sana";
-  return date.toLocaleDateString('en', {
-    day: '2-digit', month: 'long', year: 'numeric'
-  });
-};
-
-const groupResultsByDate = (results) => {
-  const grouped = {};
-  results.forEach(result => {
-    const date = new Date(result.date);
-    if (isNaN(date.getTime())) return; // Invalid date check
-    const key = date.toISOString().slice(0, 10);
-    if (!grouped[key]) {
-      grouped[key] = [];
-    }
-    grouped[key].push(result);
-  });
-  return grouped;
-};
-
-export default function UserResults() {
-  const [results, setResults] = useState([]);
-  const [groupedResults, setGroupedResults] = useState({});
+const GroupedQuestions = ({ subjectId }) => {
+  const [groupedQuestions, setGroupedQuestions] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
-    const fetchResults = async () => {
+    const fetchQuestions = async () => {
       setLoading(true);
-      const subjectId = localStorage.getItem("subjectId")
+      const storedSubjectId = localStorage.getItem("subjectId");
+      const idToUse = subjectId || storedSubjectId;
+
       try {
-        const response = await axios.get(`http://localhost:5001/api/subject/${subjectId}`);
-        setResults(response.data);
-        setGroupedResults(groupResultsByDate(response.data));
-      } catch (error) {
-        console.error("Natijalarni olishda xatolik:", error);
-        setError(error.response?.data?.error || "Natijalarni yuklashda xatolik yuz berdi");
+        const response = await axios.get(`http://localhost:5001/api/subject/${idToUse}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        const data = response.data;
+
+        // Savollarni created_at bo'yicha guruhlash
+        const grouped = data.reduce((acc, question) => {
+          const date = new Date(question.created_at).toISOString().split('T')[0];
+          if (!acc[date]) acc[date] = [];
+          acc[date].push(question);
+          return acc;
+        }, {});
+
+        setGroupedQuestions(grouped);
+      } catch (err) {
+        setError(err.response?.data?.error || err.message || "Savollarni yuklashda xatolik");
       } finally {
         setLoading(false);
       }
     };
-    fetchResults();
-  }, []);
-  console.log(results);
-  
+
+    if (subjectId || localStorage.getItem("subjectId")) fetchQuestions();
+  }, [subjectId]);
+
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString('uz-UZ', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-4 text-red-600 bg-red-100 rounded-lg">
+        Xatolik: {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold text-blue-700 mb-6">Foydalanuvchilar Natijalari</h1>
-      {error && <p className="text-red-500 mb-4">Xatolik: {error}</p>}
-      {loading && <p className="text-gray-700 mt-4">Yuklanmoqda...</p>}
-      
-      {Object.keys(groupedResults).sort().map(date => (
-        <div key={date} className="mb-4 w-full max-w-4xl">
+    <div className="max-w-4xl mx-auto p-4">
+      {Object.keys(groupedQuestions).sort().map((date) => (
+        <div key={date} className="mb-4 w-full">
           <button
             onClick={() => setSelectedDate(selectedDate === date ? null : date)}
-            className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
           >
             {formatDate(date)}
           </button>
           {selectedDate === date && (
             <div className="mt-2 p-4 bg-white rounded-lg shadow-md">
-              {groupedResults[date].map((result, index) => (
-                <div key={index} className="mb-4 border-b pb-2">
-                  <h2 className="text-lg font-semibold text-gray-800">{result.user_name}</h2>
-                  <p className="text-gray-600">Savollar:</p>
-                  {result.questions.map((question) => (
-                    <div key={question.id} className="mt-2 p-3 bg-gray-100 rounded-lg">
-                      <p className="font-bold text-gray-900">{question.question_text}</p>
-                      <ul className="mt-2 space-y-1">
-                        {question.options.map((option) => (
-                          <li key={option.id} className={`p-2 rounded-lg ${option.is_correct ? 'bg-green-200' : 'bg-gray-200'}`}>
-                            {option.option_text}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+              {groupedQuestions[date].map((question, index) => (
+                <div key={index} className="mb-4 border-b pb-2 last:border-b-0">
+                  <p className="text-gray-600 font-medium mb-2">Savol:</p>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="font-bold text-gray-900">{question.question_text}</p>
+                    <ul className="mt-2 space-y-2">
+                      {question.options.map((option) => (
+                        <li
+                          key={option.id}
+                          className={`p-2 rounded-lg ${
+                            option.is_correct ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'
+                          }`}
+                        >
+                          {option.option_text}
+                          {option.is_correct && (
+                            <span className="ml-2 text-green-600 font-medium">✓</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               ))}
             </div>
@@ -90,4 +106,6 @@ export default function UserResults() {
       ))}
     </div>
   );
-}
+};
+
+export default GroupedQuestions;
