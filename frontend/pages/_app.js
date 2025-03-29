@@ -8,35 +8,47 @@ import Cookies from 'js-cookie';
 
 export default function App({ Component, pageProps }) {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Yuklanish holati qo'shildi
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      // Cookie'dan tokenni tekshirish
-      const token = Cookies.get('token'); // Token nomini loyihangizga moslashtiring
+    const checkAuth = async () => {
+      const token = Cookies.get('token'); // Tokenni tekshirish
+      const currentPath = router.pathname; // Joriy sahifa URL'ini olish
 
-      if (!token) {
-        router.push('/Login'); // Token bo'lmasa login sahifasiga yo'naltirish
+      // Agar token bo'lmasa va joriy sahifa /Login dan boshqa bo'lsa
+      if (!token && currentPath !== '/Login') {
+        router.replace('/Login'); // /Login ga yo'naltirish
         return;
       }
 
-      try {
-        const response = await axios.get("http://localhost:5001/auth/profile", {
-          withCredentials: true, // Cookie’ni yuborish
-          headers: {
-            Authorization: `Bearer ${token}`, // Agar backend tokenni header'dan kutar bo'lsa
-          },
-        });
-        setUser(response.data);
-      } catch (error) {
-        console.error("Xatolik:", error.response?.data || error.message);
-        setUser(null);
-        router.push('/Login'); // Xatolik bo'lsa ham login sahifasiga yo'naltirish
+      // Agar token bo'lsa, foydalanuvchi ma'lumotlarini olish
+      if (token) {
+        try {
+          const response = await axios.get("http://localhost:5001/auth/profile", {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setUser(response.data);
+        } catch (error) {
+          console.error("Xatolik:", error.response?.data || error.message);
+          setUser(null);
+          router.replace('/Login'); // Xatolik bo'lsa login sahifasiga
+        }
       }
+
+      setIsLoading(false); // Yuklanish tugadi
     };
 
-    fetchUser();
-  }, [router]);
+    checkAuth();
+  }, [router.pathname]); // router.pathname qo'shildi
+
+  // Yuklanish davom etayotgan bo'lsa, hech narsa render qilinmaydi
+  if (isLoading) {
+    return null; // Yoki loading spinner qo'shish mumkin
+  }
 
   return (
     <>
