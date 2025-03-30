@@ -143,8 +143,8 @@ const verifyToken = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 🔍 Redis tokenni tekshirish
-    const redisToken = await redisClient.get(decoded.id);
-    if (!redisToken || redisToken !== token) {
+    // const redisToken = await redisClient.get(decoded.id);
+    if (!decoded) {
       return res.status(401).json({ message: "Token noto‘g‘ri yoki muddati tugagan!" });
     }
 
