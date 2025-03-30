@@ -135,4 +135,4 @@ const login = async (req, res) => {
 
 
 
-module.exports = { register, logins };
+module.exports = { register, login};
