@@ -131,8 +131,30 @@ const login = async (req, res) => {
 };
 
 
+const verifyToken = async (req, res) => {
+  const { token } = req.body;
+console.log('res', token);
+
+  if (!token) {
+    return res.status(401).json({ message: "Token kerak!" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 🔍 Redis tokenni tekshirish
+    const redisToken = await redisClient.get(decoded.id);
+    if (!redisToken || redisToken !== token) {
+      return res.status(401).json({ message: "Token noto‘g‘ri yoki muddati tugagan!" });
+    }
+
+    res.json({ message: "Token yaroqli!", user: decoded });
+  } catch (err) {
+    res.status(401).json({ message: "Token noto‘g‘ri yoki eskirgan!" });
+  }
+};
 
 
 
 
-module.exports = { register, login};
+module.exports = { register, login, verifyToken };

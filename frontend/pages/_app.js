@@ -11,7 +11,9 @@ export default function App({ Component, pageProps }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    const token = localStorage.getItem("token")
+    console.log(token);
+    
 
     if (token) {
       Axios.post("http://localhost:5001/auth/verify-token", { token }, { withCredentials: true })

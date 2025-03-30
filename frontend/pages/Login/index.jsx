@@ -58,7 +58,7 @@ localStorage.setItem("token", res.data.token)
       console.log("🟢 Tokeni:", decoded.role, 'salom');
 
       if (decoded.role === "admin") {
-        router.push("/questions");
+        router.push("/Superadmin");
       } else {
         router.push("/quiz");
       }
