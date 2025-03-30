@@ -24,7 +24,7 @@ const loginLimiter = rateLimit({
 // Routelar
 router.post("/register", register);
 router.post("/login", loginLimiter, login);
-router.get("/profile", authenticate, getProfile);
+
 
 // router.get("/profile", authenticate, (req, res) => {
 //   res.json({ message: `Xush kelibsiz, foydalanuvchi ID: ${req.user.id}` });

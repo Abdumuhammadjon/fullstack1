@@ -133,16 +133,6 @@ const login = async (req, res) => {
 
 
 
-// 📌 Profil olish
-const getProfile = async (req, res) => {
-  try {
-    const { data: user, error } = await supabase.from("users").select("id, email, role").eq("id", req.user.id).single();
-    if (error || !user) return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
-    res.json({ id: user.id, email: user.email, role: user.role });
-  } catch (error) {
-    console.error("Profil olishda xatolik:", error);
-    res.status(500).json({ message: "Server xatosi" });
-  }
-};
 
-module.exports = { register, login, getProfile };
+
+module.exports = { register, logins };
