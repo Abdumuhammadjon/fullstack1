@@ -112,7 +112,7 @@ const login = async (req, res) => {
     // 6️⃣ Cookie sozlash
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.JWT_SECRET,
       sameSite: "Strict",
       maxAge: 3600000,
     });
