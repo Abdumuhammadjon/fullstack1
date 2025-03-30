@@ -133,7 +133,7 @@ const login = async (req, res) => {
 
 const verifyToken = async (req, res) => {
   const { token } = req.body;
-console.log('res', token);
+
 
   if (!token) {
     return res.status(401).json({ message: "Token kerak!" });
