@@ -13,7 +13,7 @@ export default function App({ Component, pageProps }) {
   
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const publicRoutes = ["/Login", "/Register"];
+    const publicRoutes = ["/Login", "/register"];
     
     if (!token) {
       if (!publicRoutes.includes(router.pathname)) {
