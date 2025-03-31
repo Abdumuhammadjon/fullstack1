@@ -172,10 +172,9 @@ const getQuestionsBySubject = async (req, res) => {
   }
 };
 
-
 const checkUserAnswers = async (req, res) => {
   try {
-    const { answers, userId, subjectId } = req.body; // Foydalanuvchi javoblari
+    const { answers, userId, subjectId } = req.body;
 
     if (!answers || answers.length === 0) {
       return res.status(400).json({ error: "Javoblar talab qilinadi!" });
@@ -185,14 +184,13 @@ const checkUserAnswers = async (req, res) => {
       return res.status(400).json({ error: "Foydalanuvchi ID va subjectId talab qilinadi!" });
     }
 
-    const startTime = Date.now(); // Javoblarni tekshirish boshlanish vaqti
     let correctCount = 0;
     const totalQuestions = answers.length;
 
     for (const answer of answers) {
       const { questionId, variantId } = answer;
 
-      // 1. Variant to'g'ri yoki noto'g'ri ekanligini tekshirish
+      // Variantning to‘g‘ri yoki noto‘g‘ri ekanligini tekshirish
       const { data: option, error: optionError } = await supabase
         .from("options")
         .select("is_correct")
@@ -209,13 +207,9 @@ const checkUserAnswers = async (req, res) => {
       }
     }
 
-    const endTime = Date.now(); // Javoblarni tekshirish tugash vaqti
-    const timeSpent = Math.round((endTime - startTime) / 1000); // Sekundlarga aylantirish
-
-    // 2. Foizni hisoblash
     const scorePercentage = ((correctCount / totalQuestions) * 100).toFixed(2);
 
-    // 3. Natijalarni `results` jadvaliga saqlash
+    // **Natijalarni saqlash**
     const { error: saveError } = await supabase
       .from("results")
       .insert([
@@ -225,9 +219,8 @@ const checkUserAnswers = async (req, res) => {
           correct_answers: correctCount,
           total_questions: totalQuestions,
           score_percentage: scorePercentage,
-          time_spent: timeSpent, // Backend hisoblagan vaqtni saqlaymiz
-          created_at: new Date().toISOString() // Natija yaratilgan vaqt
-        }
+          created_at: new Date().toISOString(),
+        },
       ]);
 
     if (saveError) {
@@ -239,7 +232,7 @@ const checkUserAnswers = async (req, res) => {
       totalQuestions,
       correctAnswers: correctCount,
       scorePercentage: `${scorePercentage}%`,
-      timeSpent: `${timeSpent} sekund`
+      message: "Natija muvaffaqiyatli saqlandi!",
     });
 
   } catch (err) {
@@ -247,7 +240,6 @@ const checkUserAnswers = async (req, res) => {
     return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
-
 
 
 

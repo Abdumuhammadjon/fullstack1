@@ -58,7 +58,7 @@ export default function Home() {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [natija , setNatija] = useState({})
+  const [natija, setNatija] = useState({});
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -90,8 +90,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-  console.log(groupedQuestions);
-  
 
   const handleOptionChange = (questionId, variantId, variantText) => {
     setSelectedOptions(prev => ({
@@ -101,30 +99,45 @@ export default function Home() {
   };
 
   const handleSaveAnswers = async () => {
-    const answers = Object.values(selectedOptions).map(({ questionId, variantId, variantText }) => ({
-      subjectId: selectedSubject,
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Foydalanuvchi ID topilmadi. Iltimos, tizimga kiring!");
+      return;
+    }
+  
+    if (!selectedSubject) {
+      alert("Fanni tanlang!");
+      return;
+    }
+  
+    const answers = Object.values(selectedOptions).map(({ questionId, variantId }) => ({
       questionId,
       variantId,
-      variantText
     }));
-console.log(answers);
-
+  
+    if (answers.length === 0) {
+      alert("Iltimos, hech bo‘lmaganda bitta javob belgilang!");
+      return;
+    }
+  
     try {
-      const res = await axios.post("http://localhost:5001/api/save-answers", { answers });
+      const res = await axios.post("http://localhost:5001/api/save-answers", {
+        answers,
+        userId,
+        subjectId: selectedSubject,
+      });
+  
       alert("Javoblar muvaffaqiyatli saqlandi!");
-      setNatija(res.data)
+      setNatija(res.data);
     } catch (error) {
       alert("Javoblarni saqlashda xatolik yuz berdi");
     }
   };
-console.log(natija);
-
+  
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold text-blue-700 mb-6">Fanlar ro‘yxati</h1>
-
       {error && <p className="text-red-500 mb-4">Xatolik: {error}</p>}
-
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-4xl">
         {subjects.map((subject) => (
           <button
@@ -136,7 +149,6 @@ console.log(natija);
           </button>
         ))}
       </div>
-
       {selectedSubject && (
         <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Savollar sanasi bo‘yicha</h2>
@@ -153,7 +165,6 @@ console.log(natija);
           </div>
         </div>
       )}
-
       {selectedDate && groupedQuestions[selectedDate] && (
         <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Savollar</h2>
