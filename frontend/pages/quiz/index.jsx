@@ -58,6 +58,7 @@ export default function Home() {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [natija , setNatija] = useState({})
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -109,12 +110,14 @@ export default function Home() {
 console.log(answers);
 
     try {
-      await axios.post("http://localhost:5001/api/save-answers", { answers });
+      const res = await axios.post("http://localhost:5001/api/save-answers", { answers });
       alert("Javoblar muvaffaqiyatli saqlandi!");
+      setNatija(res.data)
     } catch (error) {
       alert("Javoblarni saqlashda xatolik yuz berdi");
     }
   };
+console.log(natija);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">

@@ -173,60 +173,51 @@ const getQuestionsBySubject = async (req, res) => {
 };
 
 
-const checkAnswers = async (req, res) => {
+const checkUserAnswers = async (req, res) => {
   try {
-    // 1. Frontenddan kelgan javoblarni olish
-    const { answers } = req.body;
-    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+    const { answers } = req.body; // Frontenddan kelgan javoblar
+    if (!answers || answers.length === 0) {
       return res.status(400).json({ error: "Javoblar talab qilinadi!" });
     }
 
     let correctCount = 0;
-    let incorrectCount = 0;
-    let results = [];
+    const totalQuestions = answers.length;
 
-    // 2. Har bir javobni tekshirish
     for (const answer of answers) {
       const { questionId, variantId } = answer;
 
-      // 3. Baza bo'yicha to'g'ri javobni tekshirish
-      const { data: option, error } = await supabase
+      // Variant to'g'ri yoki noto'g'ri ekanligini tekshirish
+      const { data: option, error: optionError } = await supabase
         .from("options")
-        .select("id, is_correct, option_text")
+        .select("is_correct")
         .eq("id", variantId)
         .single();
 
-      if (error || !option) {
+      if (optionError) {
+        console.error("Variantni tekshirishda xatolik:", optionError);
         return res.status(500).json({ error: "Variantni tekshirishda xatolik!" });
       }
 
-      // 4. Natijani hisoblash
-      if (option.is_correct) {
+      if (option && option.is_correct) {
         correctCount++;
-      } else {
-        incorrectCount++;
       }
-
-      results.push({
-        questionId,
-        selectedVariantId: variantId,
-        selectedVariantText: option.option_text,
-        isCorrect: option.is_correct,
-      });
     }
 
-    // 5. Natijani qaytarish
+    const scorePercentage = ((correctCount / totalQuestions) * 100).toFixed(2);
+
     return res.status(200).json({
-      correctCount,
-      incorrectCount,
-      totalQuestions: answers.length,
-      results,
+      totalQuestions,
+      correctAnswers: correctCount,
+      scorePercentage: `${scorePercentage}%`
     });
   } catch (err) {
     console.error("Server xatosi:", err);
     return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
+
+
+
 
 
 
@@ -276,4 +267,4 @@ const checkAnswers = async (req, res) => {
 
 
 
-module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject, checkAnswers ,  deleteSubject,  getAdmins };
+module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };
