@@ -14,7 +14,7 @@ const Question = ({ question, selectedOptions, handleOptionChange }) => {
                 name={`question-${question.id}`}
                 value={option.id}
                 checked={selectedOptions[question.id]?.variantId === option.id}
-                onChange={() => handleOptionChange(question.id, option.id, option.option_text)}
+                onChange={() => handleOptionChange(question.id, question.realId, option.id, option.option_text)}
                 className="mr-2"
               />
               <span className="p-3 rounded-lg bg-gray-100 border border-gray-300 w-full text-gray-800 text-base font-medium hover:bg-gray-200 transition-all duration-200">
@@ -89,22 +89,24 @@ export default function Home() {
       setLoading(false);
     }
   };
+  console.log(groupedQuestions);
+  
 
-  const handleOptionChange = (qId, oId, oText) => {
+  const handleOptionChange = (qId, realQId, oId, oText) => {
     setSelectedOptions(prev => ({
       ...prev,
-      [qId]: { variantId: oId, variantText: oText }
+      [qId]: { realQuestionId: realQId, variantId: oId, variantText: oText }
     }));
   };
 
   const handleSaveAnswers = async () => {
-    const answers = Object.keys(selectedOptions).map(questionId => ({
+    const answers = Object.keys(selectedOptions).map(questionKey => ({
       subjectId: selectedSubject,
-      questionId: parseInt(questionId, 10),
-      variantId: selectedOptions[questionId].variantId,
-      variantText: selectedOptions[questionId].variantText
+      questionId: selectedOptions[questionKey].realQuestionId,
+      variantId: selectedOptions[questionKey].variantId,
+      variantText: selectedOptions[questionKey].variantText
     }));
-    console.log(answers);
+console.log(answers);
 
     try {
       await axios.post("http://localhost:5001/api/save-answers", { answers });
@@ -113,7 +115,6 @@ export default function Home() {
       alert("Javoblarni saqlashda xatolik yuz berdi");
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
