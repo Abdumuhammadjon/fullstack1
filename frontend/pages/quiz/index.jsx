@@ -14,7 +14,7 @@ const Question = ({ question, selectedOptions, handleOptionChange }) => {
                 name={`question-${question.id}`}
                 value={option.id}
                 checked={selectedOptions[question.id]?.variantId === option.id}
-                onChange={() => handleOptionChange(question.id, question.realId, option.id, option.option_text)}
+                onChange={() => handleOptionChange(question.id, option.id, option.option_text)}
                 className="mr-2"
               />
               <span className="p-3 rounded-lg bg-gray-100 border border-gray-300 w-full text-gray-800 text-base font-medium hover:bg-gray-200 transition-all duration-200">
@@ -92,19 +92,19 @@ export default function Home() {
   console.log(groupedQuestions);
   
 
-  const handleOptionChange = (qId, realQId, oId, oText) => {
+  const handleOptionChange = (questionId, variantId, variantText) => {
     setSelectedOptions(prev => ({
       ...prev,
-      [qId]: { realQuestionId: realQId, variantId: oId, variantText: oText }
+      [questionId]: { questionId, variantId, variantText }
     }));
   };
 
   const handleSaveAnswers = async () => {
-    const answers = Object.keys(selectedOptions).map(questionKey => ({
+    const answers = Object.values(selectedOptions).map(({ questionId, variantId, variantText }) => ({
       subjectId: selectedSubject,
-      questionId: selectedOptions[questionKey].realQuestionId,
-      variantId: selectedOptions[questionKey].variantId,
-      variantText: selectedOptions[questionKey].variantText
+      questionId,
+      variantId,
+      variantText
     }));
 console.log(answers);
 
