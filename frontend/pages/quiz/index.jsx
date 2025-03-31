@@ -13,8 +13,8 @@ const Question = ({ question, selectedOptions, handleOptionChange }) => {
                 type="radio"
                 name={`question-${question.id}`}
                 value={option.id}
-                checked={selectedOptions[question.id] === option.id}
-                onChange={() => handleOptionChange(question.id, option.id)}
+                checked={selectedOptions[question.id]?.variantId === option.id}
+                onChange={() => handleOptionChange(question.id, option.id, option.option_text)}
                 className="mr-2"
               />
               <span className="p-3 rounded-lg bg-gray-100 border border-gray-300 w-full text-gray-800 text-base font-medium hover:bg-gray-200 transition-all duration-200">
@@ -90,6 +90,29 @@ export default function Home() {
     }
   };
 
+  const handleOptionChange = (qId, oId, oText) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [qId]: { variantId: oId, variantText: oText }
+    }));
+  };
+
+  const handleSaveAnswers = async () => {
+    const answers = Object.keys(selectedOptions).map(questionId => ({
+      subjectId: selectedSubject,
+      questionId: parseInt(questionId, 10),
+      variantId: selectedOptions[questionId].variantId,
+      variantText: selectedOptions[questionId].variantText
+    }));
+
+    try {
+      await axios.post("http://localhost:5001/api/save-answers", { answers });
+      alert("Javoblar muvaffaqiyatli saqlandi!");
+    } catch (error) {
+      alert("Javoblarni saqlashda xatolik yuz berdi");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold text-blue-700 mb-6">Fanlar ro‘yxati</h1>
@@ -133,9 +156,15 @@ export default function Home() {
               key={question.id}
               question={question}
               selectedOptions={selectedOptions}
-              handleOptionChange={(qId, oId) => setSelectedOptions(prev => ({ ...prev, [qId]: oId }))}
+              handleOptionChange={handleOptionChange}
             />
           ))}
+          <button
+            onClick={handleSaveAnswers}
+            className="mt-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600 transition"
+          >
+            Javoblarni Saqlash
+          </button>
         </div>
       )}
     </div>
