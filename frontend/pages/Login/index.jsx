@@ -48,6 +48,7 @@ const Login = () => {
 localStorage.setItem("subjectId", res.data.subjectId)
 localStorage.setItem("adminId", res.data.adminId)
 localStorage.setItem("token", res.data.token)
+localStorage.setItem("userId", res.data.adminId)
       const token = res.data.token;
       if (!token) throw new Error("Token kelmadi!");
 
@@ -58,7 +59,7 @@ localStorage.setItem("token", res.data.token)
       console.log("🟢 Tokeni:", decoded.role, 'salom');
 
       if (decoded.role === "admin") {
-        router.push("/Superadmin");
+        router.push("/questions");
       } else {
         router.push("/quiz");
       }

@@ -175,18 +175,24 @@ const getQuestionsBySubject = async (req, res) => {
 
 const checkUserAnswers = async (req, res) => {
   try {
-    const { answers } = req.body; // Frontenddan kelgan javoblar
+    const { answers, userId, subjectId } = req.body; // Foydalanuvchi javoblari
+
     if (!answers || answers.length === 0) {
       return res.status(400).json({ error: "Javoblar talab qilinadi!" });
     }
 
+    if (!userId || !subjectId) {
+      return res.status(400).json({ error: "Foydalanuvchi ID va subjectId talab qilinadi!" });
+    }
+
+    const startTime = Date.now(); // Javoblarni tekshirish boshlanish vaqti
     let correctCount = 0;
     const totalQuestions = answers.length;
 
     for (const answer of answers) {
       const { questionId, variantId } = answer;
 
-      // Variant to'g'ri yoki noto'g'ri ekanligini tekshirish
+      // 1. Variant to'g'ri yoki noto'g'ri ekanligini tekshirish
       const { data: option, error: optionError } = await supabase
         .from("options")
         .select("is_correct")
@@ -203,18 +209,45 @@ const checkUserAnswers = async (req, res) => {
       }
     }
 
+    const endTime = Date.now(); // Javoblarni tekshirish tugash vaqti
+    const timeSpent = Math.round((endTime - startTime) / 1000); // Sekundlarga aylantirish
+
+    // 2. Foizni hisoblash
     const scorePercentage = ((correctCount / totalQuestions) * 100).toFixed(2);
+
+    // 3. Natijalarni `results` jadvaliga saqlash
+    const { error: saveError } = await supabase
+      .from("results")
+      .insert([
+        {
+          user_id: userId,
+          subject_id: subjectId,
+          correct_answers: correctCount,
+          total_questions: totalQuestions,
+          score_percentage: scorePercentage,
+          time_spent: timeSpent, // Backend hisoblagan vaqtni saqlaymiz
+          created_at: new Date().toISOString() // Natija yaratilgan vaqt
+        }
+      ]);
+
+    if (saveError) {
+      console.error("Natijani saqlashda xatolik:", saveError);
+      return res.status(500).json({ error: "Natijani saqlashda xatolik!" });
+    }
 
     return res.status(200).json({
       totalQuestions,
       correctAnswers: correctCount,
-      scorePercentage: `${scorePercentage}%`
+      scorePercentage: `${scorePercentage}%`,
+      timeSpent: `${timeSpent} sekund`
     });
+
   } catch (err) {
     console.error("Server xatosi:", err);
     return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
+
 
 
 
