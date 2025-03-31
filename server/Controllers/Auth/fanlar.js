@@ -173,6 +173,64 @@ const getQuestionsBySubject = async (req, res) => {
 };
 
 
+const checkAnswers = async (req, res) => {
+  try {
+    // 1. Frontenddan kelgan javoblarni olish
+    const { answers } = req.body;
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({ error: "Javoblar talab qilinadi!" });
+    }
+
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let results = [];
+
+    // 2. Har bir javobni tekshirish
+    for (const answer of answers) {
+      const { questionId, variantId } = answer;
+
+      // 3. Baza bo'yicha to'g'ri javobni tekshirish
+      const { data: option, error } = await supabase
+        .from("options")
+        .select("id, is_correct, option_text")
+        .eq("id", variantId)
+        .single();
+
+      if (error || !option) {
+        return res.status(500).json({ error: "Variantni tekshirishda xatolik!" });
+      }
+
+      // 4. Natijani hisoblash
+      if (option.is_correct) {
+        correctCount++;
+      } else {
+        incorrectCount++;
+      }
+
+      results.push({
+        questionId,
+        selectedVariantId: variantId,
+        selectedVariantText: option.option_text,
+        isCorrect: option.is_correct,
+      });
+    }
+
+    // 5. Natijani qaytarish
+    return res.status(200).json({
+      correctCount,
+      incorrectCount,
+      totalQuestions: answers.length,
+      results,
+    });
+  } catch (err) {
+    console.error("Server xatosi:", err);
+    return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
+  }
+};
+
+module.exports = { checkAnswers };
+
+
 // Backendda (Express.js bilan)
 // app.post("/api/submit-answers", async (req, res) => {
 //   try {
@@ -219,4 +277,4 @@ const getQuestionsBySubject = async (req, res) => {
 
 
 
-module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject,  deleteSubject,  getAdmins };
+module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject, checkAnswers ,  deleteSubject,  getAdmins };
