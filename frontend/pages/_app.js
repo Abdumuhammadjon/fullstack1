@@ -8,15 +8,18 @@ import { useRouter } from "next/router";
 
 export default function App({ Component, pageProps }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // 🔹 Yangi loading state
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
-
+    const publicRoutes = ["/Login", "/Register"];
+    
     if (!token) {
-      setLoading(false); // 🔹 Yuklash tugadi
-      router.replace("/Login"); // 🔄 Boshqa sahifa yuklanishidan oldin yo‘naltirish
+      if (!publicRoutes.includes(router.pathname)) {
+        router.replace("/Login");
+      }
+      setLoading(false);
       return;
     }
 
@@ -27,15 +30,16 @@ export default function App({ Component, pageProps }) {
       .catch((err) => {
         console.error("❌ Token noto‘g‘ri yoki eskirgan:", err.response?.data);
         Cookies.remove("token");
-        router.replace("/Login"); // 🔄 Faqat noto‘g‘ri token bo‘lsa logout qilsin
+        router.replace("/Login");
       })
       .finally(() => {
-        setLoading(false); // 🔹 Yuklash tugadi
+        setLoading(false);
       });
-  }, []);
+  }, [router.pathname]);
 
-  // 🔹 Yuklash jarayonida hech narsa ko‘rsatmaymiz
-  if (loading) return null;
+  if (loading || (!user && !["/Login", "/Register"].includes(router.pathname))) {
+    return null;
+  }
 
   return (
     <>
