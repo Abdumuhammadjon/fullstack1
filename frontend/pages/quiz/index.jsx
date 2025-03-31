@@ -104,6 +104,7 @@ export default function Home() {
       variantId: selectedOptions[questionId].variantId,
       variantText: selectedOptions[questionId].variantText
     }));
+    console.log(answers);
 
     try {
       await axios.post("http://localhost:5001/api/save-answers", { answers });
@@ -112,6 +113,7 @@ export default function Home() {
       alert("Javoblarni saqlashda xatolik yuz berdi");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
