@@ -228,7 +228,6 @@ const checkAnswers = async (req, res) => {
   }
 };
 
-module.exports = { checkAnswers };
 
 
 // Backendda (Express.js bilan)
