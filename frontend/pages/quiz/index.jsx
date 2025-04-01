@@ -90,6 +90,8 @@ export default function Home() {
       setLoading(false);
     }
   };
+  console.log(groupedQuestions);
+  
 
   const handleOptionChange = (questionId, variantId, variantText) => {
     setSelectedOptions(prev => ({
@@ -133,6 +135,8 @@ export default function Home() {
       alert("Javoblarni saqlashda xatolik yuz berdi");
     }
   };
+  console.log(natija);
+  
   
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
