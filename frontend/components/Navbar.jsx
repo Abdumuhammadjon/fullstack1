@@ -7,29 +7,20 @@ const Navbar = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Sahifa yuklanganda login holatini tekshirish
   useEffect(() => {
-    const token = localStorage.getItem('token'); // Token yoki boshqa autentifikatsiya belgisi
+    const token = localStorage.getItem('token');
     setIsLoggedIn(!!token); // Token mavjud bo'lsa true, aks holda false
-  }, []);
+  }, [router]); // Router o'zgarganda holatni qayta tekshirish
 
   const handleLogout = () => {
-    // Cookiesni o'chirish
     document.cookie.split(";").forEach(function(cookie) {
       const name = cookie.split("=")[0].trim();
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     });
 
-    // localStorage'ni tozalash
     localStorage.clear();
-    
-    // sessionStorage'ni tozalash
     sessionStorage.clear();
-
-    // Login holatini yangilash
     setIsLoggedIn(false);
-
-    // Login sahifasiga yo'naltirish
     router.push('/Login');
   };
 
@@ -55,12 +46,12 @@ const Navbar = () => {
           </Link>
         </li>
         {isLoggedIn && (
-          <li 
-            className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors duration-200"
+          <li
+            className="flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer bg-indigo-700 hover:bg-indigo-800 transition-colors duration-200"
             onClick={handleLogout}
           >
             <LogOut size={20} />
-            <span className="hidden md:inline">Chiqish</span>
+            <span className="hidden md:inline font-medium">Chiqish</span>
           </li>
         )}
       </ul>
