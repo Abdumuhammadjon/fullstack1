@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 import { Menu, Home, Users, BarChart, Settings } from 'lucide-react';
 
 const GroupedQuestions = ({ subjectId }) => {
@@ -8,13 +9,13 @@ const GroupedQuestions = ({ subjectId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const router = useRouter();
 
   const handleSubjectClick = () => {
     router.push("/questions");
   };
 
-  const handleresultClick = () => {
+  const handleResultClick = () => {
     router.push("/results");
   };
 
@@ -22,13 +23,11 @@ const GroupedQuestions = ({ subjectId }) => {
     router.push("/UserResults");
   };
 
-
-  
   const handleLogout = () => {
     // Cookiesni o'chirish
     document.cookie.split(";").forEach(function(cookie) {
-        const name = cookie.split("=")[0].trim();
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      const name = cookie.split("=")[0].trim();
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     });
 
     // localStorage'ni tozalash
@@ -39,7 +38,7 @@ const GroupedQuestions = ({ subjectId }) => {
 
     // Login sahifasiga yo'naltirish
     router.push('/Login');
-};
+  };
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -80,7 +79,7 @@ const GroupedQuestions = ({ subjectId }) => {
   };
 
   return (
-    <div className="flex flex-col -ml-5  h-screen bg-gray-100">
+    <div className="flex flex-col -ml-5 h-screen bg-gray-100">
       {/* Navbar */}
       <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-50 top-0">
         <h1 className="text-2xl font-bold text-gray-800">Savollar Bazasi</h1>
@@ -96,7 +95,7 @@ const GroupedQuestions = ({ subjectId }) => {
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
               <Home size={24} /> {isSidebarOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleresultClick}>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleResultClick}>
               <Users size={24} /> {isSidebarOpen && "Foydalanuvchilar"}
             </li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleUserResultsClick}>
@@ -106,9 +105,9 @@ const GroupedQuestions = ({ subjectId }) => {
               <Settings size={24} /> {isSidebarOpen && "Sozlamalar"}
             </li>
             <br /><br />
-             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-                                        <Settings size={24} /> {isOpen && "Chiqish"}
-                                    </li>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
+              <Settings size={24} /> {isSidebarOpen && "Chiqish"}
+            </li>
           </ul>
         </div>
 
