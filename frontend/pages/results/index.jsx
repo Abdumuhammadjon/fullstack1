@@ -9,6 +9,20 @@ const GroupedQuestions = ({ subjectId }) => {
   const [error, setError] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+
+  const handleSubjectClick = () => {
+    router.push("/questions");
+  };
+
+  const handleSubjectClick = () => {
+    router.push("/results");
+  };
+
+  const handleSubjectClick = () => {
+    router.push("/UserResults");
+  };
+
+
   useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
@@ -61,13 +75,13 @@ const GroupedQuestions = ({ subjectId }) => {
             <Menu size={24} />
           </button>
           <ul className="space-y-4">
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
               <Home size={24} /> {isSidebarOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
               <Users size={24} /> {isSidebarOpen && "Foydalanuvchilar"}
             </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
               <BarChart size={24} /> {isSidebarOpen && "Hisobotlar"}
             </li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
