@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from "next/router";
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Menu, Home, Users, BarChart, Settings, Trash, CheckCircle } from 'lucide-react';
+import { Menu, Home, Users, BarChart, Settings, Trash, CheckCircle, LogOut } from 'lucide-react';
 
 export default function Admin() {
   const [questions, setQuestions] = useState([]);
@@ -142,9 +142,9 @@ export default function Admin() {
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleResultsClick} ><BarChart size={24} /> {isOpen && "Hisobotlar"}</li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"><Settings size={24} /> {isOpen && "Sozlamalar"}</li>
             <br /><br />
-             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-                                        <Settings size={24} /> {isOpen && "Chiqish"}
-                                    </li>
+                      <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
+              <LogOut size={24} /> {isSidebarOpen && "Chiqish"}
+            </li>
           </ul>
         </div>
 

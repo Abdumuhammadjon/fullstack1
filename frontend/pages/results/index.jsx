@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { Menu, Home, Users, BarChart, Settings } from 'lucide-react';
+import { Menu, Home, Users, BarChart, Settings, LogOut } from 'lucide-react';
 
 const GroupedQuestions = ({ subjectId }) => {
   const [groupedQuestions, setGroupedQuestions] = useState({});
@@ -106,8 +106,8 @@ const GroupedQuestions = ({ subjectId }) => {
             </li>
             <br /><br />
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-              <Settings size={24} /> {isSidebarOpen && "Chiqish"}
-            </li>
+  <LogOut size={24} /> {isSidebarOpen && "Chiqish"}
+</li>
           </ul>
         </div>
 
