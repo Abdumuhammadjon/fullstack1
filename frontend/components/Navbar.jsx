@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { useRouter } from 'next/router';
 import { LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Sahifa yuklanganda login holatini tekshirish
+  useEffect(() => {
+    const token = localStorage.getItem('token'); // Token yoki boshqa autentifikatsiya belgisi
+    setIsLoggedIn(!!token); // Token mavjud bo'lsa true, aks holda false
+  }, []);
 
   const handleLogout = () => {
     // Cookiesni o'chirish
@@ -18,6 +25,9 @@ const Navbar = () => {
     
     // sessionStorage'ni tozalash
     sessionStorage.clear();
+
+    // Login holatini yangilash
+    setIsLoggedIn(false);
 
     // Login sahifasiga yo'naltirish
     router.push('/Login');
@@ -44,13 +54,15 @@ const Navbar = () => {
             Contact
           </Link>
         </li>
-        <li 
-          className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors duration-200"
-          onClick={handleLogout}
-        >
-          <LogOut size={20} />
-          <span className="hidden md:inline">Chiqish</span>
-        </li>
+        {isLoggedIn && (
+          <li 
+            className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors duration-200"
+            onClick={handleLogout}
+          >
+            <LogOut size={20} />
+            <span className="hidden md:inline">Chiqish</span>
+          </li>
+        )}
       </ul>
     </nav>
   );
