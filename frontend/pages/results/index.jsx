@@ -23,6 +23,24 @@ const GroupedQuestions = ({ subjectId }) => {
   };
 
 
+  
+  const handleLogout = () => {
+    // Cookiesni o'chirish
+    document.cookie.split(";").forEach(function(cookie) {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    });
+
+    // localStorage'ni tozalash
+    localStorage.clear();
+    
+    // sessionStorage'ni tozalash
+    sessionStorage.clear();
+
+    // Login sahifasiga yo'naltirish
+    router.push('/Login');
+};
+
   useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
@@ -87,6 +105,10 @@ const GroupedQuestions = ({ subjectId }) => {
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
               <Settings size={24} /> {isSidebarOpen && "Sozlamalar"}
             </li>
+            <br /><br />
+             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
+                                        <Settings size={24} /> {isOpen && "Chiqish"}
+                                    </li>
           </ul>
         </div>
 
