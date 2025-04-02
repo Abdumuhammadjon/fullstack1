@@ -14,11 +14,11 @@ const GroupedQuestions = ({ subjectId }) => {
     router.push("/questions");
   };
 
-  const handleSubjectClick = () => {
+  const handleresultClick = () => {
     router.push("/results");
   };
 
-  const handleSubjectClick = () => {
+  const handleUserResultsClick = () => {
     router.push("/UserResults");
   };
 
@@ -78,10 +78,10 @@ const GroupedQuestions = ({ subjectId }) => {
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
               <Home size={24} /> {isSidebarOpen && "Bosh sahifa"}
             </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleresultClick}>
               <Users size={24} /> {isSidebarOpen && "Foydalanuvchilar"}
             </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
+            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleUserResultsClick}>
               <BarChart size={24} /> {isSidebarOpen && "Hisobotlar"}
             </li>
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
