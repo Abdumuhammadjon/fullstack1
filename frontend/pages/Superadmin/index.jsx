@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router"; // 1️⃣ Routerni import qilamiz
 import React, { useState } from "react";
-import { Home, Users, BarChart, Settings, Menu } from "lucide-react";
+import { Home, Users, BarChart, Settings, Menu, LogOut } from "lucide-react";
 
 const ChartComponent = dynamic(() => import("../../components/ChartComponent"), { ssr: false });
 
@@ -61,6 +61,10 @@ export default function Dashboard() {
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Settings size={24} /> {isOpen && "Sozlamalar"}
+            </li>
+            <br /><br />
+                      <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
+              <LogOut size={24} /> {isSidebarOpen && "Chiqish"}
             </li>
           </ul>
         </div>
