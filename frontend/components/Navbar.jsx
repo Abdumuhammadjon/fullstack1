@@ -1,8 +1,10 @@
-import React from 'react'
-import Link from "next/link"; 
+import React from 'react';
+import Link from "next/link";
+import { useRouter } from 'next/router';
 import { LogOut } from 'lucide-react';
 
 const Navbar = () => {
+  const router = useRouter();
 
   const handleLogout = () => {
     // Cookiesni o'chirish
@@ -22,23 +24,36 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={styles.navbar}>
-    <h1 style={styles.logo}>MyApp</h1>
-    <ul style={styles.navLinks}>
-      <li><Link href="/">Home</Link></li>
-      <li><Link href="/about">About</Link></li>
-      <li><Link href="/contact">Contact</Link></li>
-      <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-  <LogOut size={24} /> { "Chiqish"}
-</li>
-      
-    </ul>
-  </nav>
-  )
-}
-const styles = {
-    navbar: { display: "flex", justifyContent: "space-between", padding: "15px", background: "#334", color: "#fff" },
-    logo: { fontSize: "20px", fontWeight: "bold" },
-    navLinks: { listStyle: "none", display: "flex", gap: "15px" }
-  };
-export default Navbar
+    <nav className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+      <h1 className="text-2xl font-bold tracking-wide">
+        <Link href="/">MyApp</Link>
+      </h1>
+      <ul className="flex items-center gap-8">
+        <li>
+          <Link href="/" className="text-white hover:text-indigo-200 transition-colors duration-200">
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link href="/about" className="text-white hover:text-indigo-200 transition-colors duration-200">
+            About
+          </Link>
+        </li>
+        <li>
+          <Link href="/contact" className="text-white hover:text-indigo-200 transition-colors duration-200">
+            Contact
+          </Link>
+        </li>
+        <li 
+          className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors duration-200"
+          onClick={handleLogout}
+        >
+          <LogOut size={20} />
+          <span className="hidden md:inline">Chiqish</span>
+        </li>
+      </ul>
+    </nav>
+  );
+};
+
+export default Navbar;
