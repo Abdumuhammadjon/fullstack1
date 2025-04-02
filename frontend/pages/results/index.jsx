@@ -9,7 +9,44 @@ const GroupedQuestions = ({ subjectId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Login holatini qo'shdim
   const router = useRouter();
+
+  useEffect(() => {
+    const storedSubjectId = localStorage.getItem("subjectId");
+    const idToUse = subjectId || storedSubjectId;
+
+    if (!idToUse) {
+      router.push('/Login'); // Subject ID yo'q bo'lsa login sahifasiga yo'naltirish
+    } else {
+      setIsLoggedIn(true); // Foydalanuvchi login qilgan deb hisoblaymiz
+      fetchQuestions(idToUse);
+    }
+  }, [subjectId, router]);
+
+  const fetchQuestions = async (idToUse) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:5001/api/subject/${idToUse}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = response.data;
+
+      const grouped = data.reduce((acc, question) => {
+        const date = new Date(question.created_at).toISOString().split('T')[0];
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(question);
+        return acc;
+      }, {});
+
+      setGroupedQuestions(grouped);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Savollarni yuklashda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubjectClick = () => {
     router.push("/questions");
@@ -24,62 +61,27 @@ const GroupedQuestions = ({ subjectId }) => {
   };
 
   const handleLogout = () => {
-    // Cookiesni o'chirish
     document.cookie.split(";").forEach(function(cookie) {
       const name = cookie.split("=")[0].trim();
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     });
 
-    // localStorage'ni tozalash
     localStorage.clear();
-    
-    // sessionStorage'ni tozalash
     sessionStorage.clear();
-
-    // Login sahifasiga yo'naltirish
+    setIsLoggedIn(false); // Logout holatini yangilash
     router.push('/Login');
   };
-
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      setLoading(true);
-      const storedSubjectId = localStorage.getItem("subjectId");
-      const idToUse = subjectId || storedSubjectId;
-
-      try {
-        const response = await axios.get(`http://localhost:5001/api/subject/${idToUse}`, {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const data = response.data;
-
-        const grouped = data.reduce((acc, question) => {
-          const date = new Date(question.created_at).toISOString().split('T')[0];
-          if (!acc[date]) acc[date] = [];
-          acc[date].push(question);
-          return acc;
-        }, {});
-
-        setGroupedQuestions(grouped);
-      } catch (err) {
-        setError(err.response?.data?.error || err.message || "Savollarni yuklashda xatolik");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (subjectId || localStorage.getItem("subjectId")) fetchQuestions();
-  }, [subjectId]);
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('uz-UZ', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   return (
-    <div className="flex flex-col -ml-5 h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100">
       {/* Navbar */}
       <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-50 top-0">
         <h1 className="text-2xl font-bold text-gray-800">Savollar Bazasi</h1>
@@ -105,29 +107,31 @@ const GroupedQuestions = ({ subjectId }) => {
               <Settings size={24} /> {isSidebarOpen && "Sozlamalar"}
             </li>
             <br /><br />
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-  <LogOut size={24} /> {isSidebarOpen && "Chiqish"}
-</li>
+            {isLoggedIn && (
+              <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
+                <LogOut size={24} /> {isSidebarOpen && "Chiqish"}
+              </li>
+            )}
           </ul>
         </div>
 
         {/* Main Content */}
-        <div className={`flex-1 p-4 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
+        <div className={`flex-1 p-6 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           ) : error ? (
-            <div className="text-center p-4 text-red-600 bg-red-100 rounded-lg">
+            <div className="text-center p-4 text-red-600 bg-red-100 rounded-lg shadow-md">
               Xatolik: {error}
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto space-y-6">
               {Object.keys(groupedQuestions).sort().map((date) => (
                 <div key={date} className="mb-4 w-full">
                   <button
                     onClick={() => setSelectedDate(selectedDate === date ? null : date)}
-                    className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+                    className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200"
                   >
                     {formatDate(date)}
                   </button>
