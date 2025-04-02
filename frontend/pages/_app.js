@@ -37,7 +37,7 @@ export default function App({ Component, pageProps }) {
       });
   }, [router.pathname]);
 
-  if (loading || (!user && !["/Login", "/register"].includes(router.pathname))) {
+  if (loading || (!user && !["/Login", "/register, home, about, contact"].includes(router.pathname))) {
     return null;
   }
 
