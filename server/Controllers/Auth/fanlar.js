@@ -244,10 +244,10 @@ const checkUserAnswers = async (req, res) => {
 
 const getUserResults = async (req, res) => {
   try {
-    const { "userId": userId } = req.params;
+    const userId = req.params.id; // :id dan userId olish
     const { subjectId } = req.query;
     console.log(userId);
-    console.log('ggg', subjectId);
+    
     
     
 
@@ -260,7 +260,7 @@ const getUserResults = async (req, res) => {
     let query = supabase
       .from("results")
       .select("id, subject_id, correct_answers, total_questions, score_percentage, created_at")
-      .eq("user_id", userId)
+      .eq("subject_id", subjectId)
       .order("created_at", { ascending: false });
 
     // Add subjectId filter if provided
@@ -295,12 +295,12 @@ const getUserResults = async (req, res) => {
       totalResults: formattedResults.length,
       message: "Natijalar muvaffaqiyatli olindi!"
     });
-
   } catch (err) {
     console.error("Server xatosi:", err);
     return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
+
 
 
 
