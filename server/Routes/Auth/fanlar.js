@@ -4,7 +4,7 @@ const {
   createSubject,
   getSubjects,
   updateSubject,
-  deleteSubject, checkUserAnswers  , getQuestionsBySubject,
+  deleteSubject, checkUserAnswers  ,   getUserResults, getQuestionsBySubject,
 } = require("../../Controllers/Auth/fanlar");
 const {
    getAdmins,
@@ -19,5 +19,6 @@ router.get("/subjects", getSubjects);
 router.put("/subjects/:id", updateSubject);
 router.delete("/subjects/:id", deleteSubject);
 router.get("/subject/:id", getQuestionsBySubject)
+router.get("/userResults/:userId",  getUserResults )
 
 module.exports = router;

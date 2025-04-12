@@ -1,90 +1,136 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { useRouter } from "next/router";
-import { Menu, Home, Users, BarChart, Settings, LogOut } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { BarChart } from 'lucide-react';
+import axios from 'axios';
 
-const Index = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const UserResults = () => {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // Token yoki boshqa autentifikatsiya belgisi
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const subjectId = localStorage.getItem('subjectId');
+    console.log(userId);
+    
+
     if (!token) {
-      router.push('/Login'); // Agar token yo'q bo'lsa, login sahifasiga yo'naltirish
-    } else {
-      setIsLoggedIn(true);
+      router.push('/Login');
+      return;
     }
+
+    const fetchResults = async () => {
+      if (!userId) {
+        setError('Foydalanuvchi ID topilmadi');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const url = subjectId
+          ? `http://localhost:5001/api/userResults/${userId}/?subjectId=${subjectId}`
+          : `http://localhost:5001/api/userResults/${userId}`;
+
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        setResults(response.data.results || []);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Natijalarni olishda xatolik');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
   }, [router]);
 
-  const handleSubjectClick = () => {
-    router.push("/results");
-  };
-
-  const handleResultsClick = () => {
-    router.push("/UserResults");
-  };
-
-  const handleLogout = () => {
-    document.cookie.split(";").forEach(function(cookie) {
-      const name = cookie.split("=")[0].trim();
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-    });
-
-    localStorage.clear();
-    sessionStorage.clear();
-    setIsLoggedIn(false);
-    router.push('/Login');
+  const handleBack = () => {
+    router.push('/');
   };
 
   return (
-    <div className="flex -ml-5 flex-col h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 p-6">
       <Head>
-        <title>Admin Paneli</title>
-        <meta name="description" content="Savollar va variantlar qo‘shish" />
+        <title>Foydalanuvchi Natijalari</title>
+        <meta name="description" content="Foydalanuvchi test natijalari" />
       </Head>
 
-      <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-50 top-0">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-      </div>
-
-      <div className="flex flex-1 pt-16">
-        <div className={`bg-gray-900 text-white fixed h-full p-5 top-16 transition-all duration-300 ${isOpen ? "w-64" : "w-20"}`}>
-          <button className="text-white mb-6" onClick={() => setIsOpen(!isOpen)}>
-            <Menu size={24} />
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+            <BarChart size={24} />
+            Foydalanuvchi Natijalari
+          </h2>
+          <button
+            onClick={handleBack}
+            className="px-4 py rowing-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
+          >
+            Orqaga
           </button>
-          <ul className="space-y-4">
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
-              <Home size={24} /> {isOpen && "Bosh sahifa"}
-            </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleSubjectClick}>
-              <Users size={24} /> {isOpen && "Foydalanuvchilar"}
-            </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleResultsClick}>
-              <BarChart size={24} /> {isOpen && "Hisobotlar"}
-            </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
-              <Settings size={24} /> {isOpen && "Sozlamalar"}
-            </li>
-            <br /><br />
-            {isLoggedIn && (
-              <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-                <LogOut size={24} /> {isOpen && "Chiqish"}
-              </li>
-            )}
-          </ul>
         </div>
 
-        {/* Asosiy kontent uchun placeholder */}
-        <div className={`flex-1 p-6 transition-all duration-300 ${isOpen ? "ml-64" : "ml-20"}`}>
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Xush kelibsiz!</h2>
-            <p className="text-gray-600">Bu admin panelining bosh sahifasi. Yuqoridagi menyudan kerakli bo‘limni tanlang.</p>
+        {loading && (
+          <p className="text-gray-600">Natijalar yuklanmoqda...</p>
+        )}
+
+        {error && (
+          <p className="text-red-500 bg-red-100 p-3 rounded-lg">{error}</p>
+        )}
+
+        {!loading && !error && results.length === 0 && (
+          <p className="text-gray-600">Hech qanday natija topilmadi.</p>
+        )}
+
+        {!loading && !error && results.length > 0 && (
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fan ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    To'g'ri javoblar
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Umumiy savollar
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Foiz
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sana
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {results.map((result) => (
+                  <tr key={result.resultId}>
+                    <td className="px-6 py-4 whitespace-nowrap">{result.subjectId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{result.correctAnswers}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{result.totalQuestions}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{result.scorePercentage}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{result.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default Index;
+export default UserResults;

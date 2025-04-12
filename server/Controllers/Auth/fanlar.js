@@ -242,54 +242,67 @@ const checkUserAnswers = async (req, res) => {
 };
 
 
+const getUserResults = async (req, res) => {
+  try {
+    const { "userId": userId } = req.params;
+    const { subjectId } = req.query;
+    console.log(userId);
+    console.log('ggg', subjectId);
+    
+    
+
+    // Validate input
+    if (!userId) {
+      return res.status(400).json({ error: "Foydalanuvchi ID majburiy!" });
+    }
+
+    // Build query for results
+    let query = supabase
+      .from("results")
+      .select("id, subject_id, correct_answers, total_questions, score_percentage, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    // Add subjectId filter if provided
+    if (subjectId) {
+      query = query.eq("subject_id", subjectId);
+    }
+
+    // Fetch results from database
+    const { data: results, error } = await query;
+
+    if (error) {
+      console.error("Natijalarni olishda xatolik:", error);
+      return res.status(500).json({ error: "Natijalarni olishda xatolik!" });
+    }
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "Foydalanuvchi uchun natijalar topilmadi!" });
+    }
+
+    // Format response
+    const formattedResults = results.map(result => ({
+      resultId: result.id,
+      subjectId: result.subject_id,
+      correctAnswers: result.correct_answers,
+      totalQuestions: result.total_questions,
+      scorePercentage: `${result.score_percentage}%`,
+      date: new Date(result.created_at).toLocaleString("uz-UZ")
+    }));
+
+    return res.status(200).json({
+      results: formattedResults,
+      totalResults: formattedResults.length,
+      message: "Natijalar muvaffaqiyatli olindi!"
+    });
+
+  } catch (err) {
+    console.error("Server xatosi:", err);
+    return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
+  }
+};
 
 
 
 
-// Backendda (Express.js bilan)
-// app.post("/api/submit-answers", async (req, res) => {
-//   try {
-//     // Frontenddan kelgan ma'lumotlarni olish
-//     const { subject_id, answers } = req.body;
-
-//     // Ma'lumotlarni tekshirish
-//     if (!subject_id || !answers || !answers.length) {
-//       return res.status(400).json({ error: "subject_id va answers talab qilinadi!" });
-//     }
-
-//     // Foydalanuvchi ID sini olish (agar autentifikatsiya bo'lsa)
-//     // Agar autentifikatsiya yo'q bo'lsa, bu qismni o'chirib tashlash mumkin
-//     const user_id = req.user?.id; // req.user autentifikatsiya middleware orqali keladi
-//     if (!user_id) {
-//       return res.status(401).json({ error: "Foydalanuvchi autentifikatsiyasi talab qilinadi!" });
-//     }
-
-//     // Ma'lumotlarni Supabase'dagi user_answers jadvaliga yozish
-//     const insertPromises = answers.map(async (answer) => {
-//       const { error } = await supabase.from("user_answers").insert({
-//         subject_id: subject_id,
-//         question_id: answer.question_id,
-//         option_id: answer.option_id,
-//         user_id: user_id, // Foydalanuvchi ID si
-//         created_at: new Date().toISOString(), // Yaratilgan vaqt (agar jadvalda bo'lsa)
-//       });
-
-//       if (error) {
-//         throw new Error(`Javobni saqlashda xatolik: ${error.message}`);
-//       }
-//     });
-
-//     // Barcha insert operatsiyalarini bajarish
-//     await Promise.all(insertPromises);
-
-//     // Muvaffaqiyatli javob qaytarish
-//     return res.status(200).json({ message: "Javoblar muvaffaqiyatli saqlandi!" });
-//   } catch (err) {
-//     console.error("Javoblarni saqlashda xatolik:", err);
-//     return res.status(500).json({ error: "Javoblarni saqlashda xatolik yuz berdi!" });
-//   }
-// });
-
-
-
-module.exports = { createSubject, getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };
+module.exports = { createSubject, getUserResults,   getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };
