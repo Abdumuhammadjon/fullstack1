@@ -113,16 +113,17 @@ const UserResults = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {results.map((result) => (
-                  <tr key={result.resultId}>
-                    <td className="px-6 py-4 whitespace-nowrap">{result.subjectId}</td> {/* subjectId chiqarildi */}
-                    <td className="px-6 py-4 whitespace-nowrap">{result.correctAnswers}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{result.totalQuestions}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{result.scorePercentage}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{result.date}</td>
-                  </tr>
-                ))}
-              </tbody>
+  {results.map((result) => (
+    <tr key={result.resultId}>
+      <td className="px-6 py-4 whitespace-nowrap">{result.subjectId}</td>
+      <td className="px-6 py-4 whitespace-nowrap">{result.correctAnswers}</td>
+      <td className="px-6 py-4 whitespace-nowrap">{result.totalQuestions}</td>
+      <td className="px-6 py-4 whitespace-nowrap">{result.scorePercentage}</td>
+      <td className="px-6 py-4 whitespace-nowrap">{result.date}</td>
+    </tr>
+  ))}
+</tbody>
+
             </table>
           </div>
         )}
