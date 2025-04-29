@@ -4,7 +4,9 @@ import axios from "axios";
 const Question = ({ question, selectedOptions, handleOptionChange }) => {
   return (
     <div className="p-4 border-b">
-      <p className="font-bold text-lg text-gray-900">{question.question_text}</p>
+      <p className="font-bold text-lg text-gray-900">
+        {question.question_text}
+      </p>
       {question.options && question.options.length > 0 ? (
         <ul className="mt-2 space-y-2">
           {question.options.map((option) => (
@@ -14,7 +16,9 @@ const Question = ({ question, selectedOptions, handleOptionChange }) => {
                 name={`question-${question.id}`}
                 value={option.id}
                 checked={selectedOptions[question.id]?.variantId === option.id}
-                onChange={() => handleOptionChange(question.id, option.id, option.option_text)}
+                onChange={() =>
+                  handleOptionChange(question.id, option.id, option.option_text)
+                }
                 className="mr-2"
               />
               <span className="p-3 rounded-lg bg-gray-100 border border-gray-300 w-full text-gray-800 text-base font-medium hover:bg-gray-200 transition-all duration-200">
@@ -32,14 +36,16 @@ const Question = ({ question, selectedOptions, handleOptionChange }) => {
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en', {
-    day: '2-digit', month: 'long', year: 'numeric'
+  return date.toLocaleDateString("en", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
 };
 
 const groupQuestionsByDate = (questions) => {
   const grouped = {};
-  questions.forEach(question => {
+  questions.forEach((question) => {
     const date = new Date(question.created_at);
     const key = date.toISOString().slice(0, 10);
     if (!grouped[key]) {
@@ -81,7 +87,9 @@ export default function Home() {
     setSelectedOptions({});
     setSelectedDate(null);
     try {
-      const response = await axios.get(`http://localhost:5001/api/subject/${subjectId}`);
+      const response = await axios.get(
+        `http://localhost:5001/api/subject/${subjectId}`
+      );
       setSelectedSubject(subjectId);
       setGroupedQuestions(groupQuestionsByDate(response.data));
     } catch (error) {
@@ -91,12 +99,11 @@ export default function Home() {
     }
   };
   console.log(groupedQuestions);
-  
 
   const handleOptionChange = (questionId, variantId, variantText) => {
-    setSelectedOptions(prev => ({
+    setSelectedOptions((prev) => ({
       ...prev,
-      [questionId]: { questionId, variantId, variantText }
+      [questionId]: { questionId, variantId, variantText },
     }));
   };
 
@@ -106,29 +113,31 @@ export default function Home() {
       alert("Foydalanuvchi ID topilmadi. Iltimos, tizimga kiring!");
       return;
     }
-  
+
     if (!selectedSubject) {
       alert("Fanni tanlang!");
       return;
     }
-  
-    const answers = Object.values(selectedOptions).map(({ questionId, variantId }) => ({
-      questionId,
-      variantId,
-    }));
-  
+
+    const answers = Object.values(selectedOptions).map(
+      ({ questionId, variantId }) => ({
+        questionId,
+        variantId,
+      })
+    );
+
     if (answers.length === 0) {
       alert("Iltimos, hech bo‘lmaganda bitta javob belgilang!");
       return;
     }
-  
+
     try {
       const res = await axios.post("http://localhost:5001/api/save-answers", {
         answers,
         userId,
         subjectId: selectedSubject,
       });
-  
+
       alert("Javoblar muvaffaqiyatli saqlandi!");
       setNatija(res.data);
     } catch (error) {
@@ -136,8 +145,7 @@ export default function Home() {
     }
   };
   console.log(natija);
-  
-  
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold text-blue-700 mb-6">Fanlar ro‘yxati</h1>
@@ -155,24 +163,30 @@ export default function Home() {
       </div>
       {selectedSubject && (
         <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Savollar sanasi bo‘yicha</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            Savollar sanasi bo‘yicha
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.keys(groupedQuestions).sort().map(date => (
-              <button
-                key={date}
-                onClick={() => setSelectedDate(date)}
-                className="bg-gray-200 p-3 rounded-lg shadow-md hover:bg-gray-300 transition"
-              >
-                {formatDate(date)}
-              </button>
-            ))}
+            {Object.keys(groupedQuestions)
+              .sort()
+              .map((date) => (
+                <button
+                  key={date}
+                  onClick={() => setSelectedDate(date)}
+                  className="bg-gray-200 p-3 rounded-lg shadow-md hover:bg-gray-300 transition"
+                >
+                  {formatDate(date)}
+                </button>
+              ))}
           </div>
         </div>
       )}
       {selectedDate && groupedQuestions[selectedDate] && (
         <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Savollar</h2>
-          {groupedQuestions[selectedDate].map(question => (
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            Savollar
+          </h2>
+          {groupedQuestions[selectedDate].map((question) => (
             <Question
               key={question.id}
               question={question}

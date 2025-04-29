@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { BarChart } from 'lucide-react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { BarChart } from "lucide-react";
+import axios from "axios";
 
 const UserResults = () => {
   const [results, setResults] = useState([]);
@@ -11,18 +11,18 @@ const UserResults = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    const subjectId = localStorage.getItem('subjectId');
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    const subjectId = localStorage.getItem("subjectId");
 
     if (!token) {
-      router.push('/Login');
+      router.push("/Login");
       return;
     }
 
     const fetchResults = async () => {
       if (!userId) {
-        setError('Foydalanuvchi ID topilmadi');
+        setError("Foydalanuvchi ID topilmadi");
         setLoading(false);
         return;
       }
@@ -38,13 +38,13 @@ const UserResults = () => {
         const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         setResults(response.data.results || []);
       } catch (err) {
-        setError(err.response?.data?.error || 'Natijalarni olishda xatolik');
+        setError(err.response?.data?.error || "Natijalarni olishda xatolik");
       } finally {
         setLoading(false);
       }
@@ -53,10 +53,9 @@ const UserResults = () => {
     fetchResults();
   }, [router]);
   console.log(results);
-  
 
   const handleBack = () => {
-    router.push('/questions');
+    router.push("/questions");
   };
 
   return (
@@ -80,9 +79,7 @@ const UserResults = () => {
           </button>
         </div>
 
-        {loading && (
-          <p className="text-gray-600">Natijalar yuklanmoqda...</p>
-        )}
+        {loading && <p className="text-gray-600">Natijalar yuklanmoqda...</p>}
 
         {error && (
           <p className="text-red-500 bg-red-100 p-3 rounded-lg">{error}</p>
@@ -115,17 +112,26 @@ const UserResults = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-  {results.map((result) => (
-    <tr key={result.resultId}>
-      <td className="px-6 py-4 whitespace-nowrap">{result.username}</td>
-      <td className="px-6 py-4 whitespace-nowrap">{result.correctAnswers}</td>
-      <td className="px-6 py-4 whitespace-nowrap">{result.totalQuestions}</td>
-      <td className="px-6 py-4 whitespace-nowrap">{result.scorePercentage}</td>
-      <td className="px-6 py-4 whitespace-nowrap">{result.date}</td>
-    </tr>
-  ))}
-</tbody>
-
+                {results.map((result) => (
+                  <tr key={result.resultId}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {result.username}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {result.correctAnswers}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {result.totalQuestions}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {result.scorePercentage}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {result.date}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         )}
