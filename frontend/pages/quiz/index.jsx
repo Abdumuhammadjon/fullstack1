@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 
+// Savol komponenti
 const Question = ({ question, selectedOptions, handleOptionChange }) => {
   return (
     <div className="p-4 border-b">
-      <p className="font-bold text-lg text-gray-900">
-        {question.question_text}
-      </p>
+      <p className="font-bold text-lg text-gray-900">{question.question_text}</p>
       {question.options && question.options.length > 0 ? (
         <ul className="mt-2 space-y-2">
           {question.options.map((option) => (
@@ -34,6 +34,7 @@ const Question = ({ question, selectedOptions, handleOptionChange }) => {
   );
 };
 
+// Sana formatlash
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en", {
@@ -43,6 +44,7 @@ const formatDate = (dateString) => {
   });
 };
 
+// Savollarni sanasi bo‘yicha guruhlash
 const groupQuestionsByDate = (questions) => {
   const grouped = {};
   questions.forEach((question) => {
@@ -57,6 +59,7 @@ const groupQuestionsByDate = (questions) => {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [subjects, setSubjects] = useState([]);
   const [groupedQuestions, setGroupedQuestions] = useState({});
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -64,7 +67,6 @@ export default function Home() {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [natija, setNatija] = useState({});
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -98,7 +100,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-  console.log(groupedQuestions);
 
   const handleOptionChange = (questionId, variantId, variantText) => {
     setSelectedOptions((prev) => ({
@@ -139,12 +140,16 @@ export default function Home() {
       });
 
       alert("Javoblar muvaffaqiyatli saqlandi!");
-      setNatija(res.data);
+
+      // ✅ Sahifani natijalar sahifasiga o'tkazish
+      router.push({
+        pathname: "/Natija",
+        query: { subjectId: selectedSubject },
+      });
     } catch (error) {
       alert("Javoblarni saqlashda xatolik yuz berdi");
     }
   };
-  console.log(natija);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
@@ -161,6 +166,7 @@ export default function Home() {
           </button>
         ))}
       </div>
+
       {selectedSubject && (
         <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -181,11 +187,10 @@ export default function Home() {
           </div>
         </div>
       )}
+
       {selectedDate && groupedQuestions[selectedDate] && (
         <div className="mt-6 w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Savollar
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Savollar</h2>
           {groupedQuestions[selectedDate].map((question) => (
             <Question
               key={question.id}
