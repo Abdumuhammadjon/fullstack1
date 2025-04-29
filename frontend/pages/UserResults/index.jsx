@@ -117,7 +117,7 @@ const UserResults = () => {
               <tbody className="bg-white divide-y divide-gray-200">
   {results.map((result) => (
     <tr key={result.resultId}>
-      <td className="px-6 py-4 whitespace-nowrap">{result.subjectId}</td>
+      <td className="px-6 py-4 whitespace-nowrap">{result.username}</td>
       <td className="px-6 py-4 whitespace-nowrap">{result.correctAnswers}</td>
       <td className="px-6 py-4 whitespace-nowrap">{result.totalQuestions}</td>
       <td className="px-6 py-4 whitespace-nowrap">{result.scorePercentage}</td>
