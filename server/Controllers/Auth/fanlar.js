@@ -244,50 +244,54 @@ const checkUserAnswers = async (req, res) => {
 
 const getUserResults = async (req, res) => {
   try {
-    const userId = req.params.id; // :id dan userId olish
+    const userId = req.params.id;
     const { subjectId } = req.query;
-    console.log(userId);
-    
-    
-    
+    console.log('userId:', userId, 'subjectId:', subjectId);
 
-    // Validate input
     if (!userId) {
       return res.status(400).json({ error: "Foydalanuvchi ID majburiy!" });
     }
 
-    // Build query for results
+    // Supabase query
     let query = supabase
       .from("results")
-      .select("id, subject_id, correct_answers, total_questions, score_percentage, created_at")
+      .select(`
+        id,
+        user_id,
+        subject_id,
+        correct_answers,
+        total_questions,
+        score_percentage,
+        created_at,
+        users:users!user_id(username)
+      `)
       .eq("subject_id", subjectId)
       .order("created_at", { ascending: false });
 
-    // Add subjectId filter if provided
     if (subjectId) {
       query = query.eq("subject_id", subjectId);
     }
 
-    // Fetch results from database
     const { data: results, error } = await query;
 
     if (error) {
       console.error("Natijalarni olishda xatolik:", error);
-      return res.status(500).json({ error: "Natijalarni olishda xatolik!" });
+      return res.status(500).json({ error: error.message });
     }
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ message: "Foydalanuvchi uchun natijalar topilmadi!" });
+      return res.status(404).json({ message: "Natijalar topilmadi!" });
     }
 
-    // Format response
     const formattedResults = results.map(result => ({
       resultId: result.id,
+      userId: result.user_id, // <-- Bu qo'shildi
       subjectId: result.subject_id,
       correctAnswers: result.correct_answers,
       totalQuestions: result.total_questions,
       scorePercentage: `${result.score_percentage}%`,
-      date: new Date(result.created_at).toLocaleString("uz-UZ")
+      date: new Date(result.created_at).toLocaleString("uz-UZ"),
+      username: result.users?.username || "Noma'lum",
     }));
 
     return res.status(200).json({
@@ -300,6 +304,7 @@ const getUserResults = async (req, res) => {
     return res.status(500).json({ error: "Serverda xatolik yuz berdi!" });
   }
 };
+
 
 
 

@@ -14,8 +14,6 @@ const UserResults = () => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
     const subjectId = localStorage.getItem('subjectId');
-    console.log(userId);
-    
 
     if (!token) {
       router.push('/Login');
@@ -34,7 +32,7 @@ const UserResults = () => {
         setError(null);
 
         const url = subjectId
-          ? `http://localhost:5001/api/userResults/${userId}/?subjectId=${subjectId}`
+          ? `http://localhost:5001/api/userResults/${userId}?subjectId=${subjectId}`
           : `http://localhost:5001/api/userResults/${userId}`;
 
         const response = await axios.get(url, {
@@ -54,7 +52,6 @@ const UserResults = () => {
 
     fetchResults();
   }, [router]);
-console.log(results);
 
   const handleBack = () => {
     router.push('/questions');
@@ -75,7 +72,7 @@ console.log(results);
           </h2>
           <button
             onClick={handleBack}
-            className="px-4 py rowing-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
+            className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
           >
             Orqaga
           </button>
@@ -118,7 +115,7 @@ console.log(results);
               <tbody className="bg-white divide-y divide-gray-200">
                 {results.map((result) => (
                   <tr key={result.resultId}>
-                    <td className="px-6 py-4 whitespace-nowrap">{result.userId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{result.subjectId}</td> {/* subjectId chiqarildi */}
                     <td className="px-6 py-4 whitespace-nowrap">{result.correctAnswers}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{result.totalQuestions}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{result.scorePercentage}</td>
