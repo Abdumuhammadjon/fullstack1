@@ -346,7 +346,7 @@ const getUserResult = async (req, res) => {
       resultSummary: result
     });
 
-    console.log(result);
+    
     
 
   } catch (err) {
