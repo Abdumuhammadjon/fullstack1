@@ -307,7 +307,71 @@ const getUserResults = async (req, res) => {
 
 
 
+const getUserResult = async (req, res) => {
+  const { userId, subjectId } = req.query;
+
+  if (!userId || !subjectId) {
+    return res.status(400).json({ error: 'userId va subjectId kerak' });
+  }
+
+  try {
+    // 1. Oxirgi natijani olish (results jadvalidan)
+    const { data: results, error: resultError } = await supabase
+      .from('results')
+      .select('correct_answers, total_questions, score_percentage, created_at')
+      .eq('user_id', userId)
+      .eq('subject_id', subjectId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (resultError || !results) {
+      return res.status(404).json({ error: 'Natijalar topilmadi' });
+    }
+
+    // 2. subject nomini olish
+    const { data: subject, error: subjectError } = await supabase
+      .from('subjects')
+      .select('name')
+      .eq('id', subjectId)
+      .single();
+
+    // 3. Foydalanuvchining javoblari (agar answers jadvallari mavjud bo‘lsa)
+    const { data: answers, error: answersError } = await supabase
+      .from('answers')
+      .select(`
+        question_id,
+        selected_option_id,
+        questions(text),
+        selected_option:options(text),
+        correct_option:questions(correct_option_id, options!correct_option_id_fkey(text))
+      `)
+      .eq('user_id', userId)
+      .eq('subject_id', subjectId);
+
+    // Javoblar bo‘lsa, har biriga `isCorrect` qo‘shamiz
+    const preparedAnswers = (answers || []).map(ans => ({
+      questionText: ans.questions?.text,
+      selectedOptionText: ans.selected_option?.text,
+      correctOptionText: ans.correct_option?.options?.text,
+      isCorrect: ans.selected_option_id === ans.correct_option?.correct_option_id
+    }));
+
+    res.json({
+      subjectName: subject?.name || 'Nomaʼlum fan',
+      summary: results,
+      answers: preparedAnswers
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server xatosi' });
+  }
+};
 
 
 
-module.exports = { createSubject, getUserResults,   getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };
+
+
+
+module.exports = { createSubject, getUserResults,  getUserResult,  getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };
