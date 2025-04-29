@@ -18,9 +18,9 @@ const ResultsPage = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:5001/api/user-results?userId=${userId}&subjectId=${subjectId}`
+          `http://localhost:5001/api/userResults?userId=${userId}&subjectId=${subjectId}`
         );
-        setResults(res.data.answers || []);
+        setResults(res.data.resultSummary || []);
         setSubjectName(res.data.subjectName || "Fan");
       } catch (err) {
         setError("Natijalarni yuklashda xatolik yuz berdi");
@@ -31,6 +31,9 @@ const ResultsPage = () => {
 
     fetchResults();
   }, [subjectId]);
+  
+  console.log(results);
+  
 
   if (loading) return <p className="p-4">Yuklanmoqda...</p>;
   if (error) return <p className="p-4 text-red-500">{error}</p>;

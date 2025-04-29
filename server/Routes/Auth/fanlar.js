@@ -20,5 +20,5 @@ router.put("/subjects/:id", updateSubject);
 router.delete("/subjects/:id", deleteSubject);
 router.get("/subject/:id", getQuestionsBySubject)
 router.get("/userResults/:id",  getUserResults )
-router.get("/userResults/:id",  getUserResult )
+router.get("/userResults",  getUserResult )
 module.exports = router;

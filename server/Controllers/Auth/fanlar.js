@@ -316,7 +316,7 @@ const getUserResult = async (req, res) => {
 
   try {
     // 1. Oxirgi natijani olish (results jadvalidan)
-    const { data: results, error: resultError } = await supabase
+    const { data: result, error: resultError } = await supabase
       .from('results')
       .select('correct_answers, total_questions, score_percentage, created_at')
       .eq('user_id', userId)
@@ -325,43 +325,29 @@ const getUserResult = async (req, res) => {
       .limit(1)
       .single();
 
-    if (resultError || !results) {
-      return res.status(404).json({ error: 'Natijalar topilmadi' });
+    if (resultError || !result) {
+      return res.status(404).json({ error: 'Natija topilmadi' });
     }
 
-    // 2. subject nomini olish
+    // 2. Fan nomini olish
     const { data: subject, error: subjectError } = await supabase
       .from('subjects')
       .select('name')
       .eq('id', subjectId)
       .single();
 
-    // 3. Foydalanuvchining javoblari (agar answers jadvallari mavjud bo‘lsa)
-    const { data: answers, error: answersError } = await supabase
-      .from('answers')
-      .select(`
-        question_id,
-        selected_option_id,
-        questions(text),
-        selected_option:options(text),
-        correct_option:questions(correct_option_id, options!correct_option_id_fkey(text))
-      `)
-      .eq('user_id', userId)
-      .eq('subject_id', subjectId);
+    if (subjectError) {
+      return res.status(500).json({ error: 'Fan nomini olishda xato' });
+    }
 
-    // Javoblar bo‘lsa, har biriga `isCorrect` qo‘shamiz
-    const preparedAnswers = (answers || []).map(ans => ({
-      questionText: ans.questions?.text,
-      selectedOptionText: ans.selected_option?.text,
-      correctOptionText: ans.correct_option?.options?.text,
-      isCorrect: ans.selected_option_id === ans.correct_option?.correct_option_id
-    }));
-
+    // Javob qaytarish
     res.json({
       subjectName: subject?.name || 'Nomaʼlum fan',
-      summary: results,
-      answers: preparedAnswers
+      resultSummary: result
     });
+
+    console.log(result);
+    
 
   } catch (err) {
     console.error(err);
