@@ -1,3 +1,5 @@
+// pages/UserResults.jsx
+
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -52,10 +54,26 @@ const UserResults = () => {
 
     fetchResults();
   }, [router]);
-  console.log(results);
 
   const handleBack = () => {
     router.push("/questions");
+  };
+console.log(results);
+
+  const handleDelete = async (resultId) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      await axios.delete(`http://localhost:5001/api/userResult/${resultId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setResults((prev) => prev.filter((r) => r.resultId !== resultId));
+    } catch (err) {
+      alert("O‘chirishda xatolik: " + (err.response?.data?.error || "Xatolik"));
+    }
   };
 
   return (
@@ -80,11 +98,9 @@ const UserResults = () => {
         </div>
 
         {loading && <p className="text-gray-600">Natijalar yuklanmoqda...</p>}
-
         {error && (
           <p className="text-red-500 bg-red-100 p-3 rounded-lg">{error}</p>
         )}
-
         {!loading && !error && results.length === 0 && (
           <p className="text-gray-600">Hech qanday natija topilmadi.</p>
         )}
@@ -95,10 +111,10 @@ const UserResults = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fan ID
+                    Foydalanuvchi
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    To'g'ri javoblar
+                    To‘g‘ri javoblar
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Umumiy savollar
@@ -108,6 +124,9 @@ const UserResults = () => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Sana
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amallar
                   </th>
                 </tr>
               </thead>
@@ -124,10 +143,18 @@ const UserResults = () => {
                       {result.totalQuestions}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {result.scorePercentage}
+                      {result.scorePercentage}%
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {result.date}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleDelete(result.resultId)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        O‘chirish
+                      </button>
                     </td>
                   </tr>
                 ))}
