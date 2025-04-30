@@ -7,10 +7,20 @@ const ChartComponent = dynamic(() => import("../../components/ChartComponent"), 
 
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(true);
-  const router = useRouter(); // 2️⃣ Routerni ishlatamiz
+  const router = useRouter();
 
   const handleUsersClick = () => {
-    router.push("/adminlar"); // 3️⃣ Sahifani "/adminlar"ga yo‘naltiramiz
+    router.push("/adminlar");
+  };
+
+  // handleLogout funksiyasini aniqlaymiz
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut(); // Supabase orqali logout
+    if (error) {
+      console.error("Logoutda xatolik:", error);
+    } else {
+      router.push("/login"); // Logoutdan so‘ng login sahifasiga yo‘naltiramiz
+    }
   };
 
   const data = {
@@ -52,7 +62,7 @@ export default function Dashboard() {
             </li>
             <li
               className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg"
-              onClick={handleUsersClick} // 4️⃣ Tugmachaga event qo‘shamiz
+              onClick={handleUsersClick}
             >
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
             </li>
@@ -62,9 +72,13 @@ export default function Dashboard() {
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Settings size={24} /> {isOpen && "Sozlamalar"}
             </li>
-            <br /><br />
-                      <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
-              <LogOut size={24} /> {isSidebarOpen && "Chiqish"}
+            <br />
+            <br />
+            <li
+              className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"
+              onClick={handleLogout} // handleLogout funksiyasini ishlatamiz
+            >
+              <LogOut size={24} /> {isOpen && "Chiqish"} {/* isSidebarOpen o‘rniga isOpen */}
             </li>
           </ul>
         </div>
