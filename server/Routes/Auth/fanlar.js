@@ -4,10 +4,10 @@ const {
   createSubject,
   getSubjects,
   updateSubject,
-  deleteSubject, checkUserAnswers  ,   getUserResults,  getUserResult, getQuestionsBySubject,
+  deleteSubject, checkUserAnswers  ,  deleteQuestion,  getUserResults,  getUserResult, getQuestionsBySubject,
 } = require("../../Controllers/Auth/fanlar");
 const {
-   getAdmins,
+   getAdmins, 
 } = require("../../Controllers/Auth/fanlar")
 
 
@@ -21,4 +21,5 @@ router.delete("/subjects/:id", deleteSubject);
 router.get("/subject/:id", getQuestionsBySubject)
 router.get("/userResults/:id",  getUserResults )
 router.get("/userResults",  getUserResult )
+router.delete("/question/:id",  deleteQuestion )
 module.exports = router;

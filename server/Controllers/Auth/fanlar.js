@@ -355,9 +355,40 @@ const getUserResult = async (req, res) => {
   }
 };
 
+const deleteQuestion = async (req, res) => {
+  try {
+    const questionId = req.params.id;
+
+    // Check if question exists
+    const { data: question, error: fetchError } = await supabase
+      .from('questions')
+      .select('id')
+      .eq('id', questionId)
+      .single();
+
+    if (fetchError || !question) {
+      return res.status(404).json({ error: 'Savol topilmadi' });
+    }
+
+    // Delete the question
+    const { error: deleteError } = await supabase
+      .from('questions')
+      .delete()
+      .eq('id', questionId);
+
+    if (deleteError) {
+      throw new Error(deleteError.message);
+    }
+
+    res.status(200).json({ message: 'Savol muvaffaqiyatli o\'chirildi' });
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    res.status(500).json({ error: 'Savolni o\'chirishda xatolik yuz berdi' });
+  }
+};
 
 
 
 
 
-module.exports = { createSubject, getUserResults,  getUserResult,  getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };
+module.exports = { createSubject, getUserResults, deleteQuestion, getUserResult,  getSubjects, updateSubject, getQuestionsBySubject, checkUserAnswers ,  deleteSubject,  getAdmins };

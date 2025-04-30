@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { Menu, Home, Users, BarChart, Settings, LogOut } from 'lucide-react';
+import { Menu, Home, Users, BarChart, Settings, LogOut, Trash2 } from 'lucide-react';
 
 const GroupedQuestions = ({ subjectId }) => {
   const [groupedQuestions, setGroupedQuestions] = useState({});
@@ -9,7 +9,7 @@ const GroupedQuestions = ({ subjectId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Login holatini qo'shdim
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,9 +17,9 @@ const GroupedQuestions = ({ subjectId }) => {
     const idToUse = subjectId || storedSubjectId;
 
     if (!idToUse) {
-      router.push('/Login'); // Subject ID yo'q bo'lsa login sahifasiga yo'naltirish
+      router.push('/Login');
     } else {
-      setIsLoggedIn(true); // Foydalanuvchi login qilgan deb hisoblaymiz
+      setIsLoggedIn(true);
       fetchQuestions(idToUse);
     }
   }, [subjectId, router]);
@@ -31,8 +31,6 @@ const GroupedQuestions = ({ subjectId }) => {
         headers: { 'Content-Type': 'application/json' },
       });
       const data = response.data;
-      console.log(data);
-      
 
       const grouped = data.reduce((acc, question) => {
         const date = new Date(question.created_at).toISOString().split('T')[0];
@@ -44,9 +42,29 @@ const GroupedQuestions = ({ subjectId }) => {
       setGroupedQuestions(grouped);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.error || err.message || "Savollarni yuklashda xatolik");
+      setError(err.response?.data?.error || "Savollarni yuklashda xatolik");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId, date) => {
+    if (!window.confirm("Bu savolni o'chirishni xohlaysizmi?")) return;
+
+    try {
+      await axios.delete(`http://localhost:5001/api/question/${questionId}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      setGroupedQuestions((prev) => {
+        const updated = { ...prev };
+        updated[date] = updated[date].filter((q) => q.id !== questionId);
+        if (updated[date].length === 0) delete updated[date];
+        return updated;
+      });
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.error || "Savolni o'chirishda xatolik");
     }
   };
 
@@ -70,7 +88,7 @@ const GroupedQuestions = ({ subjectId }) => {
 
     localStorage.clear();
     sessionStorage.clear();
-    setIsLoggedIn(false); // Logout holatini yangilash
+    setIsLoggedIn(false);
     router.push('/Login');
   };
 
@@ -83,7 +101,7 @@ const GroupedQuestions = ({ subjectId }) => {
   };
 
   return (
-    <div className="flex flex-col -ml-5  h-screen bg-gray-100">
+    <div className="flex flex-col -ml-5 h-screen bg-gray-100">
       {/* Navbar */}
       <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-50 top-0">
         <h1 className="text-2xl font-bold text-gray-800">Savollar Bazasi</h1>
@@ -141,7 +159,16 @@ const GroupedQuestions = ({ subjectId }) => {
                     <div className="mt-2 p-4 bg-white rounded-lg shadow-md">
                       {groupedQuestions[date].map((question, index) => (
                         <div key={index} className="mb-4 border-b pb-2 last:border-b-0">
-                          <p className="text-gray-600 font-medium mb-2">Savol:</p>
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="text-gray-600 font-medium">Savol:</p>
+                            <button
+                              onClick={() => handleDeleteQuestion(question.id, date)}
+                              className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                              title="Savolni o'chirish"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
                           <div className="p-3 bg-gray-50 rounded-lg">
                             <p className="font-bold text-gray-900">{question.question_text}</p>
                             <ul className="mt-2 space-y-2">
