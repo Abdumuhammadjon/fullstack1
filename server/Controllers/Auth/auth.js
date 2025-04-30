@@ -122,7 +122,6 @@ const login = async (req, res) => {
       token,
       subjectId: user.subjectId || undefined, // Agar admin bo‘lmasa, subjectId qaytarilmaydi
       adminId: user.id,
-      role: user.role
     });
 
   } catch (error) {

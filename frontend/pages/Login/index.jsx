@@ -45,23 +45,25 @@ const Login = () => {
           withCredentials: true, // 🍪 Cookie’ni qabul qilish
         }
       );
-      localStorage.setItem("subjectId", res.data.subjectId);
-      localStorage.setItem("adminId", res.data.adminId);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userId", res.data.adminId);
-      localStorage.setItem("role", res.data.role);
+localStorage.setItem("subjectId", res.data.subjectId)
+localStorage.setItem("adminId", res.data.adminId)
+localStorage.setItem("token", res.data.token)
+localStorage.setItem("userId", res.data.adminId)
+localStorage.setItem("role", res.data.role)
       const token = res.data.token;
       if (!token) throw new Error("Token kelmadi!");
 
       Cookies.set("token", token, { expires: 1 }); // 🍪 Tokenni saqlash (1 kun)
 
       const decoded = jwtDecode(token);
-      console.log("🟢 Token:", decoded, "salom");
-      console.log("🟢 Tokeni:", decoded.id, "salom");
+      console.log("🟢 Token:", decoded, 'salom');
+      console.log("🟢 Tokeni:", decoded.role, 'salom');
 
-      if (decoded.id === "fff904cd-d31d-4367-9ca3-3540c5cb110c") {
-        router.push("/adminlar");
-      } else if (decoded.role === "admin") {
+      if(decoded.role === "superadmin"){
+        router.push("/adminlar")
+      }
+
+       if (decoded.role === "admin") {
         router.push("/questions");
       } else {
         router.push("/quiz");
@@ -69,10 +71,7 @@ const Login = () => {
 
       console.log("✅ Login successful:", res.data.subjectId);
     } catch (err) {
-      console.error(
-        "❌ Login error:",
-        err.response?.data?.message || err.message
-      );
+      console.error("❌ Login error:", err.response?.data?.message || err.message);
       setError(err.response?.data?.message || "Login failed");
     }
   };
