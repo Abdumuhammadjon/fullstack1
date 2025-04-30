@@ -63,7 +63,7 @@ localStorage.setItem("role", res.data.role)
         router.push("/adminlar")
       }
 
-       if (decoded.role === "admin") {
+      else  if (decoded.role === "admin") {
         router.push("/questions");
       } else {
         router.push("/quiz");
