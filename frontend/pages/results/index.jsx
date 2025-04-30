@@ -31,6 +31,8 @@ const GroupedQuestions = ({ subjectId }) => {
         headers: { 'Content-Type': 'application/json' },
       });
       const data = response.data;
+      console.log(data);
+      
 
       const grouped = data.reduce((acc, question) => {
         const date = new Date(question.created_at).toISOString().split('T')[0];

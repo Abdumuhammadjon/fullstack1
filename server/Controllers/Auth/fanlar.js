@@ -148,7 +148,7 @@ const getQuestionsBySubject = async (req, res) => {
     for (let question of questions) {
       const { data: options, error: optionsError } = await supabase
         .from("options")
-        .select("id, option_text") // option_text va is_correct ni olamiz
+        .select("id, option_text, is_correct") // option_text va is_correct ni olamiz
         .eq("question_id", question.id); // question.id orqali variantlarni filtrlaymiz
 
       // 7. Agar variantlarni olishda xatolik bo'lsa, xato qaytarish
@@ -162,7 +162,7 @@ const getQuestionsBySubject = async (req, res) => {
     }
 
     // 9. Natijani frontendga yuborish
-    console.log(questions);
+  
     return res.status(200).json(questions);
     
   } catch (err) {
