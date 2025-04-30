@@ -121,7 +121,8 @@ const login = async (req, res) => {
       message: "Tizimga muvaffaqiyatli kirdingiz!", 
       token,
       subjectId: user.subjectId || undefined, // Agar admin bo‘lmasa, subjectId qaytarilmaydi
-      adminId: user.id 
+      adminId: user.id,
+      role: user.role
     });
 
   } catch (error) {
