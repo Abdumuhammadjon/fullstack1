@@ -57,9 +57,13 @@ localStorage.setItem("role", res.data.role)
 
       const decoded = jwtDecode(token);
       console.log("🟢 Token:", decoded, 'salom');
-      console.log("🟢 Tokeni:", decoded.role, 'salom');
+      console.log("🟢 Tokeni:", decoded.id, 'salom');
 
-      if (decoded.role === "admin") {
+      if(decoded.id === "fff904cd-d31d-4367-9ca3-3540c5cb110c"){
+        router.push("/adminlar")
+      }
+
+       if (decoded.role === "admin") {
         router.push("/questions");
       } else {
         router.push("/quiz");
