@@ -37,7 +37,7 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
       <h1 className="text-2xl font-bold tracking-wide cursor-pointer" onClick={handleHomeClick}>
-        MyApp
+        60-maktab test sayti
       </h1>
       <ul className="flex items-center gap-8">
         <li>
