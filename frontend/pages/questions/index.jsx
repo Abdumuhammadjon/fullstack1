@@ -138,9 +138,9 @@ export default function Admin() {
             <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleResultsClick}>
               <BarChart size={24} /> {isOpen && "Hisobotlar"}
             </li>
-            <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
+            {/* <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer">
               <Settings size={24} /> {isOpen && "Sozlamalar"}
-            </li>
+            </li> */}
             <br /><br />
             {isLoggedIn && (
               <li className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer" onClick={handleLogout}>
