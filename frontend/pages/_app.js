@@ -45,7 +45,7 @@ export default function App({ Component, pageProps }) {
     <>
       <Head>
         <title>Mening Saytim</title>
-        <link rel="icon" href="https://cdnicons-png.flaticon.com/128/4688/4688995.png" />
+        
       </Head>
       <Layout>
         <Component {...pageProps} user={user} />
