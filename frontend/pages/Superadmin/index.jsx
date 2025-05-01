@@ -74,9 +74,9 @@ export default function Dashboard() {
             onClick={handleHisobotClick}>
               <BarChart size={24} /> {isOpen && "Fan yaratish"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
+            {/* <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Settings size={24} /> {isOpen && "Sozlamalar"}
-            </li>
+            </li> */}
             <br />
             <br />
             <li
