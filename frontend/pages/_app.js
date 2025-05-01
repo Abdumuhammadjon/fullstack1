@@ -54,7 +54,7 @@ export default function App({ Component, pageProps }) {
         <title>Mening Saytim</title>
         <link
           rel="icon"
-          type="image/jpeg"
+          type="image/jpeg" sizes="128x128"
           href="https://media.istockphoto.com/id/2170118552/vector/sustainability-earth-hand-care-logo-icons.jpg?b=1&s=612x612&w=is&k=20&c=LIm8Jy2oryXJGgGbCSZWDewMK01BBzq0kQVlrydzjgM="
         />
       </Head>
