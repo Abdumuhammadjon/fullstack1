@@ -55,7 +55,7 @@ export default function App({ Component, pageProps }) {
         <link
           rel="icon"
           type="image/jpeg" sizes="128x128"
-          href="https://media.istockphoto.com/id/2170118552/vector/sustainability-earth-hand-care-logo-icons.jpg?b=1&s=612x612&w=is&k=20&c=LIm8Jy2oryXJGgGbCSZWDewMK01BBzq0kQVlrydzjgM="
+          href ="https://media.istockphoto.com/id/2164938957/vector/clock-keep-track-of-time-measure-timer-timepiece-timekeeper-chronometer-alarm-clock-second.jpg?s=612x612&w=0&k=20&c=npQKoQRh78PUGdFZQCaM8cSwh92jNZ_F_1RYuXxx4J8="
         />
       </Head>
       <Layout>
