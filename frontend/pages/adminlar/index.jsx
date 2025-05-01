@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { create } from "zustand";
-import { Home, Users, BarChart, Settings, Menu } from "lucide-react";
+import { Home, Users, BarChart,  LogOut, Menu } from "lucide-react";
 import axios from 'axios';
 
 const ChartComponent = dynamic(() => import("../../components/ChartComponent"), { ssr: false });
@@ -64,6 +64,18 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = () => {
+    document.cookie.split(";").forEach(function(cookie) {
+      const name = cookie.split("=")[0].trim();
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    });
+
+    localStorage.clear();
+    sessionStorage.clear();
+   // Logout holatini yangilash
+    router.push('/Login');
+  };
+
   return (
     <div className="flex -ml-5 flex-col h-screen bg-gray-100">
       <div className="bg-white shadow-md h-16 flex items-center px-6 fixed w-full z-10 top-0">
@@ -89,8 +101,13 @@ export default function Dashboard() {
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <BarChart size={24} /> {isOpen && "Hisobotlar"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
-              <Settings size={24} /> {isOpen && "Sozlamalar"}
+            <br />
+            <br />
+            <li
+              className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-lg cursor-pointer"
+              onClick={handleLogout} // handleLogout funksiyasini ishlatamiz
+            >
+              <LogOut size={24} /> {isOpen && "Chiqish"} {/* isSidebarOpen o‘rniga isOpen */}
             </li>
           </ul>
         </div>
