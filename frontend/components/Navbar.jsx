@@ -48,22 +48,7 @@ const Navbar = () => {
             Home
           </span>
         </li>
-        <li>
-          <span
-            onClick={handleAboutClick}
-            className="text-white hover:text-indigo-200 transition-colors duration-200 cursor-pointer"
-          >
-            About
-          </span>
-        </li>
-        <li>
-          <span
-            onClick={handleContactClick}
-            className="text-white hover:text-indigo-200 transition-colors duration-200 cursor-pointer"
-          >
-            Contact
-          </span>
-        </li>
+       
         {isLoggedIn && (
           <li
             className="flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer bg-indigo-700 hover:bg-indigo-800 transition-colors duration-200"
