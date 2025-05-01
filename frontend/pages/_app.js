@@ -10,11 +10,11 @@ export default function App({ Component, pageProps }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const publicRoutes = ["/Login", "/register",];
-    
+    const publicRoutes = ["/Login", "/register"];
+
     if (!token) {
       if (!publicRoutes.includes(router.pathname)) {
         router.replace("/Login");
@@ -23,7 +23,11 @@ export default function App({ Component, pageProps }) {
       return;
     }
 
-    Axios.post("http://localhost:5001/auth/verify-token", { token }, { withCredentials: true })
+    Axios.post(
+      "http://localhost:5001/auth/verify-token",
+      { token },
+      { withCredentials: true }
+    )
       .then((res) => {
         setUser(res.data.user);
       })
@@ -37,7 +41,10 @@ export default function App({ Component, pageProps }) {
       });
   }, [router.pathname]);
 
-  if (loading || (!user && !["/Login", "/register"].includes(router.pathname))) {
+  if (
+    loading ||
+    (!user && !["/Login", "/register"].includes(router.pathname))
+  ) {
     return null;
   }
 
@@ -45,7 +52,11 @@ export default function App({ Component, pageProps }) {
     <>
       <Head>
         <title>Mening Saytim</title>
-        
+        <link
+          rel="icon"
+          type="image/jpeg"
+          href="https://media.istockphoto.com/id/2170118552/vector/sustainability-earth-hand-care-logo-icons.jpg?b=1&s=612x612&w=is&k=20&c=LIm8Jy2oryXJGgGbCSZWDewMK01BBzq0kQVlrydzjgM="
+        />
       </Head>
       <Layout>
         <Component {...pageProps} user={user} />
