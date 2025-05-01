@@ -1,6 +1,12 @@
-import { useEffect, useState } from "react"; 
-import axios from 'axios'
-import { getSubjects,  updateSubject, deleteSubject, getAdmins } from "../../services/api";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/router";
+import {
+  getSubjects,
+  updateSubject,
+  deleteSubject,
+  getAdmins,
+} from "../../services/api";
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -9,12 +15,16 @@ const Subjects = () => {
   const [admins, setAdmins] = useState([]);
   const [editingSubject, setEditingSubject] = useState(null);
   const [errorMessage, setErrorMessage] = useState(""); // Xatolik xabarini saqlash uchun
+  const router = useRouter();
 
   useEffect(() => {
     fetchSubjects();
     fetchAdmins();
   }, []);
 
+  const handleBack = () => {
+    router.push("/Superadmin");
+  };
 
   const API_URL = "http://localhost:5001/api"; // Backend server manzili
 
@@ -41,21 +51,24 @@ const Subjects = () => {
       setErrorMessage("Barcha maydonlarni to‘ldiring!");
       return;
     }
-  
+
     const subjectData = { name: newSubject.trim(), admin: admin.trim() };
     console.log("Yuborilayotgan ma'lumot:", subjectData);
-  
+
     try {
       const response = await axios.post(`${API_URL}/subjects`, subjectData);
       console.log("Fan yaratildi:", response.data);
-  
+
       setNewSubject("");
       setAdmin("");
-      setErrorMessage(""); 
-      fetchSubjects(); 
+      setErrorMessage("");
+      fetchSubjects();
     } catch (error) {
-      console.error("Fan qo‘shishda xatolik:", error.response ? error.response.data : error.message);
-  
+      console.error(
+        "Fan qo‘shishda xatolik:",
+        error.response ? error.response.data : error.message
+      );
+
       if (error.response?.data?.error) {
         setErrorMessage(error.response.data.error);
       } else if (error.response?.status === 400) {
@@ -65,8 +78,6 @@ const Subjects = () => {
       }
     }
   };
-  ;
-
   const handleUpdateSubject = async () => {
     if (!editingSubject || !editingSubject.name || !editingSubject.admin) {
       setErrorMessage("Barcha maydonlarni to‘ldiring!");
@@ -83,7 +94,9 @@ const Subjects = () => {
       fetchSubjects();
     } catch (error) {
       console.error("Fan yangilashda xatolik:", error);
-      setErrorMessage(error.response?.data?.error || "Fan yangilashda xatolik yuz berdi!");
+      setErrorMessage(
+        error.response?.data?.error || "Fan yangilashda xatolik yuz berdi!"
+      );
     }
   };
 
@@ -101,9 +114,17 @@ const Subjects = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Fanlar</h2>
+      <div className="flex justify-between items-center w-full mb-4">
+        <h2 className="text-xl font-bold">Fanlar</h2>
+        <button
+          onClick={handleBack}
+          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
+        >
+          Orqaga
+        </button>
+      </div>
 
-      {errorMessage && <div className="mb-4 text-red-500">{errorMessage}</div>} {/* Xatolik xabari */}
+      {errorMessage && <div className="mb-4 text-red-500">{errorMessage}</div>}
 
       <div className="mb-4 flex gap-2">
         <input
@@ -113,7 +134,12 @@ const Subjects = () => {
           onChange={(e) => setNewSubject(e.target.value)}
           className="border p-2 rounded"
         />
-        <select value={admin} onChange={(e) => setAdmin(e.target.value)} className="border p-2 rounded">
+
+        <select
+          value={admin}
+          onChange={(e) => setAdmin(e.target.value)}
+          className="border p-2 rounded"
+        >
           <option value="">Admin tanlang</option>
           {admins.map((admin) => (
             <option key={admin.id} value={admin.id}>
@@ -121,7 +147,12 @@ const Subjects = () => {
             </option>
           ))}
         </select>
-        <button onClick={handleCreateSubject} className="bg-blue-500 text-white px-4 py-2 rounded">Qo‘shish</button>
+        <button
+          onClick={handleCreateSubject}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Qo‘shish
+        </button>
       </div>
 
       <table className="w-full border-collapse border border-gray-300">
@@ -133,6 +164,7 @@ const Subjects = () => {
             <th className="border p-2">Harakatlar</th>
           </tr>
         </thead>
+
         <tbody>
           {subjects.map((subject) => (
             <tr key={subject.id}>
@@ -142,7 +174,12 @@ const Subjects = () => {
                   <input
                     type="text"
                     value={editingSubject.name}
-                    onChange={(e) => setEditingSubject({ ...editingSubject, name: e.target.value })}
+                    onChange={(e) =>
+                      setEditingSubject({
+                        ...editingSubject,
+                        name: e.target.value,
+                      })
+                    }
                     className="border p-1"
                   />
                 ) : (
@@ -153,7 +190,12 @@ const Subjects = () => {
                 {editingSubject?.id === subject.id ? (
                   <select
                     value={editingSubject.admin}
-                    onChange={(e) => setEditingSubject({ ...editingSubject, admin: e.target.value })}
+                    onChange={(e) =>
+                      setEditingSubject({
+                        ...editingSubject,
+                        admin: e.target.value,
+                      })
+                    }
                     className="border p-1"
                   >
                     {admins.map((admin) => (
@@ -163,12 +205,16 @@ const Subjects = () => {
                     ))}
                   </select>
                 ) : (
-                  admins.find((a) => a.id === subject.admin)?.username || "Noma'lum"
+                  admins.find((a) => a.id === subject.admin)?.username ||
+                  "Noma'lum"
                 )}
               </td>
               <td className="border p-2">
                 {editingSubject?.id === subject.id ? (
-                  <button onClick={handleUpdateSubject} className="bg-green-500 text-white px-2 py-1 rounded">
+                  <button
+                    onClick={handleUpdateSubject}
+                    className="bg-green-500 text-white px-2 py-1 rounded"
+                  >
                     Saqlash
                   </button>
                 ) : (

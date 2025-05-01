@@ -12,7 +12,9 @@ export default function Dashboard() {
   const handleUsersClick = () => {
     router.push("/adminlar");
   };
-
+  const handleHisobotClick = () => {
+    router.push("/Fanlar");
+  };
   const handleLogout = () => {
     document.cookie.split(";").forEach(function(cookie) {
       const name = cookie.split("=")[0].trim();
@@ -68,8 +70,9 @@ export default function Dashboard() {
             >
               <Users size={24} /> {isOpen && "Foydalanuvchilar"}
             </li>
-            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
-              <BarChart size={24} /> {isOpen && "Hisobotlar"}
+            <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg"
+            onClick={handleHisobotClick}>
+              <BarChart size={24} /> {isOpen && "Fan yaratish"}
             </li>
             <li className="flex items-center gap-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg">
               <Settings size={24} /> {isOpen && "Sozlamalar"}

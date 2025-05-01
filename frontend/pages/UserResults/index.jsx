@@ -58,7 +58,7 @@ const UserResults = () => {
   const handleBack = () => {
     router.push("/questions");
   };
-console.log(results);
+
 
   const handleDelete = async (resultId) => {
     const token = localStorage.getItem("token");
