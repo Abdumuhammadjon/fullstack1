@@ -70,6 +70,8 @@ const login = async (req, res) => {
       }
 
       user = data;
+      console.log(user.role);
+      
 
       // 🔹 Faqat **admin** bo‘lsa `subjectId` ni olish
       if (user.role === "admin") {

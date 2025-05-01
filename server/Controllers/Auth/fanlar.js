@@ -175,6 +175,8 @@ const getQuestionsBySubject = async (req, res) => {
 const checkUserAnswers = async (req, res) => {
   try {
     const { answers, userId, subjectId } = req.body;
+    
+    
 
     if (!answers || answers.length === 0) {
       return res.status(400).json({ error: "Javoblar talab qilinadi!" });
