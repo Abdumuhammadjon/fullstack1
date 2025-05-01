@@ -53,12 +53,27 @@ const login = async (req, res) => {
     email = email.trim().toLowerCase();
     password = password.trim();
 
-    // 1️⃣ Redis keshidan olish
     let user;
+
+    // 🔐 1️⃣ Redis keshidan olish
     const cachedUserData = await redisClient.get(`user-data:${email}`);
     if (cachedUserData) {
       user = JSON.parse(cachedUserData);
+
+      // ✅ Bazani tekshirish — ehtiyot chorasi
+      const { data: dbUser, error: dbError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (dbError || !dbUser) {
+        // Redisda bo‘lsa ham, bazada yo‘q — xavfsizlik uchun bloklash
+        await redisClient.del(`user-data:${email}`);
+        return res.status(403).json({ message: "Foydalanuvchi mavjud emas!" });
+      }
     } else {
+      // 📥 Supabase’dan olish
       const { data, error } = await supabase
         .from("users")
         .select("id, email, password, role")
@@ -70,48 +85,42 @@ const login = async (req, res) => {
       }
 
       user = data;
-      console.log(user.role);
-      
 
-      // 🔹 Faqat **admin** bo‘lsa `subjectId` ni olish
+      // 🔹 Agar admin bo‘lsa, subjectId olish
       if (user.role === "admin") {
         const { data: subjectData, error: subjectError } = await supabase
           .from("subjects")
           .select("id")
-          .eq("admin", user.id) 
+          .eq("admin", user.id)
           .single();
 
-        if (!subjectError && subjectData) {
-          user.subjectId = subjectData.id;
-        } else {
-          user.subjectId = null; // Admin bo‘lsa ham subjectId bo‘lmasligi mumkin
-        }
+        user.subjectId = !subjectError && subjectData ? subjectData.id : null;
       } else {
-        user.subjectId = null; // Oddiy foydalanuvchilarga subjectId kerak emas
+        user.subjectId = null;
       }
 
-      // Redis keshga subjectId bilan saqlash
+      // 🔄 Redisga kiritish
       await redisClient.setEx(`user-data:${email}`, 3600, JSON.stringify(user));
     }
 
-    // 3️⃣ Parolni tekshirish
+    // 🔑 3️⃣ Parolni tekshirish
     const isMatch = user.password && (await bcrypt.compare(password, user.password));
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // 4️⃣ Token yaratish (faqat admin bo‘lsa subjectId qo‘shiladi)
+    // 🎫 4️⃣ Token yaratish
     const tokenPayload = { id: user.id, role: user.role };
     if (user.role === "admin" && user.subjectId) {
       tokenPayload.subjectId = user.subjectId;
     }
-    
+
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // 5️⃣ Redis’da token va subjectId ni saqlash
+    // 🧠 5️⃣ Redis’da token va subjectId ni saqlash
     await redisClient.setEx(`user-token:${user.id}`, 3600, JSON.stringify({ token, subjectId: user.subjectId || null }));
 
-    // 6️⃣ Cookie sozlash
+    // 🍪 6️⃣ Cookie sozlash
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.JWT_SECRET,
@@ -119,13 +128,12 @@ const login = async (req, res) => {
       maxAge: 3600000,
     });
 
-    res.status(200).json({ 
-      message: "Tizimga muvaffaqiyatli kirdingiz!", 
+    res.status(200).json({
+      message: "Tizimga muvaffaqiyatli kirdingiz!",
       token,
-      subjectId: user.subjectId || undefined, // Agar admin bo‘lmasa, subjectId qaytarilmaydi
+      subjectId: user.subjectId || undefined,
       adminId: user.id,
     });
-
   } catch (error) {
     console.error("Xatolik:", error);
     res.status(500).json({ message: "Server xatosi!" });
