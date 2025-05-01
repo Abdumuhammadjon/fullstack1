@@ -13,14 +13,16 @@ export default function Dashboard() {
     router.push("/adminlar");
   };
 
-  // handleLogout funksiyasini aniqlaymiz
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut(); // Supabase orqali logout
-    if (error) {
-      console.error("Logoutda xatolik:", error);
-    } else {
-      router.push("/login"); // Logoutdan so‘ng login sahifasiga yo‘naltiramiz
-    }
+  const handleLogout = () => {
+    document.cookie.split(";").forEach(function(cookie) {
+      const name = cookie.split("=")[0].trim();
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    });
+
+    localStorage.clear();
+    sessionStorage.clear();
+   // Logout holatini yangilash
+    router.push('/Login');
   };
 
   const data = {
