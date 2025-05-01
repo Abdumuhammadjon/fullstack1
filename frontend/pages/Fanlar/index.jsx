@@ -113,58 +113,62 @@ const Subjects = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center w-full mb-4">
-        <h2 className="text-xl font-bold">Fanlar</h2>
-        <button
-          onClick={handleBack}
-          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
-        >
-          Orqaga
-        </button>
-      </div>
-
-      {errorMessage && <div className="mb-4 text-red-500">{errorMessage}</div>}
-
-      <div className="mb-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="Fan nomi"
-          value={newSubject}
-          onChange={(e) => setNewSubject(e.target.value)}
-          className="border p-2 rounded"
-        />
-
-        <select
-          value={admin}
-          onChange={(e) => setAdmin(e.target.value)}
-          className="border p-2 rounded"
-        >
-          <option value="">Admin tanlang</option>
-          {admins.map((admin) => (
-            <option key={admin.id} value={admin.id}>
-              {admin.username}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={handleCreateSubject}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Qo‘shish
-        </button>
-      </div>
-
-      <table className="w-full border-collapse border border-gray-300">
+    <div className="p-4 sm:p-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4 mb-4">
+      <h2 className="text-xl font-bold">Fanlar</h2>
+      <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
+      >
+        Orqaga
+      </button>
+    </div>
+  
+    {errorMessage && <div className="mb-4 text-red-500">{errorMessage}</div>}
+  
+    {/* Input va selectlar qatorini responsiv qilish */}
+    <div className="mb-4 flex flex-col sm:flex-row gap-2 w-full">
+      <input
+        type="text"
+        placeholder="Fan nomi"
+        value={newSubject}
+        onChange={(e) => setNewSubject(e.target.value)}
+        className="border p-2 rounded w-full sm:w-auto"
+      />
+  
+      <select
+        value={admin}
+        onChange={(e) => setAdmin(e.target.value)}
+        className="border p-2 rounded w-full sm:w-auto"
+      >
+        <option value="">Admin tanlang</option>
+        {admins.map((admin) => (
+          <option key={admin.id} value={admin.id}>
+            {admin.username}
+          </option>
+        ))}
+      </select>
+  
+      <button
+        onClick={handleCreateSubject}
+        className="bg-blue-500 text-white px-4 py-2 rounded w-full sm:w-auto"
+      >
+        Qo‘shish
+      </button>
+    </div>
+  
+    {/* Jadval scrollable bo'lishi uchun */}
+    <div className="overflow-x-auto">
+      <table className="min-w-full border-collapse border border-gray-300">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-gray-200 text-sm sm:text-base">
             <th className="border p-2">ID</th>
             <th className="border p-2">Fan nomi</th>
             <th className="border p-2">Admin</th>
             <th className="border p-2">Harakatlar</th>
           </tr>
         </thead>
-
+  
         <tbody>
           {subjects.map((subject) => (
             <tr key={subject.id}>
@@ -180,7 +184,7 @@ const Subjects = () => {
                         name: e.target.value,
                       })
                     }
-                    className="border p-1"
+                    className="border p-1 w-full"
                   />
                 ) : (
                   subject.name
@@ -196,7 +200,7 @@ const Subjects = () => {
                         admin: e.target.value,
                       })
                     }
-                    className="border p-1"
+                    className="border p-1 w-full"
                   >
                     {admins.map((admin) => (
                       <option key={admin.id} value={admin.id}>
@@ -218,10 +222,10 @@ const Subjects = () => {
                     Saqlash
                   </button>
                 ) : (
-                  <>
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setEditingSubject(subject)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                      className="bg-yellow-500 text-white px-2 py-1 rounded"
                     >
                       Tahrirlash
                     </button>
@@ -231,7 +235,7 @@ const Subjects = () => {
                     >
                       O‘chirish
                     </button>
-                  </>
+                  </div>
                 )}
               </td>
             </tr>
@@ -239,6 +243,8 @@ const Subjects = () => {
         </tbody>
       </table>
     </div>
+  </div>
+  
   );
 };
 
