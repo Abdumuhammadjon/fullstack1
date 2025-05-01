@@ -43,24 +43,29 @@ const register = async (req, res) => {
 };
 
 // 📌 Kirish (Login)
+// 📌 Kirish (Login)
 const login = async (req, res) => {
   try {
     let { email, password } = req.body;
+
+    // 🔍 1. Kiruvchi ma'lumotlarni tekshirish
     if (!email || !password) {
       return res.status(400).json({ message: "Email va parol kiritilishi shart!" });
     }
 
+    // 🔤 2. Kiritilgan ma'lumotlarni tayyorlash
     email = email.trim().toLowerCase();
     password = password.trim();
 
     let user;
 
-    // 🔐 1️⃣ Redis keshidan olish
+    // 🚀 3. Avval Redis keshidan foydalanuvchini qidiramiz
     const cachedUserData = await redisClient.get(`user-data:${email}`);
+
     if (cachedUserData) {
       user = JSON.parse(cachedUserData);
 
-      // ✅ Bazani tekshirish — ehtiyot chorasi
+      // ⚠️ 3.1. Keshda bo‘lsa ham, bazada foydalanuvchi mavjudligini tekshiramiz (ehtiyot chorasi)
       const { data: dbUser, error: dbError } = await supabase
         .from("users")
         .select("id")
@@ -68,12 +73,11 @@ const login = async (req, res) => {
         .maybeSingle();
 
       if (dbError || !dbUser) {
-        // Redisda bo‘lsa ham, bazada yo‘q — xavfsizlik uchun bloklash
         await redisClient.del(`user-data:${email}`);
         return res.status(403).json({ message: "Foydalanuvchi mavjud emas!" });
       }
     } else {
-      // 📥 Supabase’dan olish
+      // 🗄️ 4. Redisda topilmasa — Supabase’dan olib kelamiz
       const { data, error } = await supabase
         .from("users")
         .select("id, email, password, role")
@@ -86,7 +90,7 @@ const login = async (req, res) => {
 
       user = data;
 
-      // 🔹 Agar admin bo‘lsa, subjectId olish
+      // 👑 4.1. Agar admin bo‘lsa — subjectId ni aniqlaymiz
       if (user.role === "admin") {
         const { data: subjectData, error: subjectError } = await supabase
           .from("subjects")
@@ -99,17 +103,17 @@ const login = async (req, res) => {
         user.subjectId = null;
       }
 
-      // 🔄 Redisga kiritish
+      // 💾 4.2. Redisga foydalanuvchini 1 soatga keshga qo‘shamiz
       await redisClient.setEx(`user-data:${email}`, 3600, JSON.stringify(user));
     }
 
-    // 🔑 3️⃣ Parolni tekshirish
+    // 🔐 5. Parolni tekshiramiz
     const isMatch = user.password && (await bcrypt.compare(password, user.password));
     if (!isMatch) {
       return res.status(400).json({ message: "Email yoki parol noto‘g‘ri!" });
     }
 
-    // 🎫 4️⃣ Token yaratish
+    // 🎫 6. JWT token yaratamiz
     const tokenPayload = { id: user.id, role: user.role };
     if (user.role === "admin" && user.subjectId) {
       tokenPayload.subjectId = user.subjectId;
@@ -117,26 +121,30 @@ const login = async (req, res) => {
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // 🧠 5️⃣ Redis’da token va subjectId ni saqlash
-    await redisClient.setEx(`user-token:${user.id}`, 3600, JSON.stringify({ token, subjectId: user.subjectId || null }));
+    // 🧠 7. Redis’da token va subjectId ni saqlaymiz
+    await redisClient.setEx(`user-token:${user.id}`, 3600, JSON.stringify({
+      token,
+      subjectId: user.subjectId || null,
+    }));
 
-    // 🍪 6️⃣ Cookie sozlash
+    // 🍪 8. Cookie sifatida tokenni yuboramiz
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.JWT_SECRET,
+      secure: process.env.JWT_SECRET, // `true` yoki `false` bo'lishi kerak — bu yerda ehtimol xato bor
       sameSite: "Strict",
-      maxAge: 3600000,
+      maxAge: 3600000, // 1 soat
     });
 
-    res.status(200).json({
+    // ✅ 9. Muvaffaqiyatli javob
+    return res.status(200).json({
       message: "Tizimga muvaffaqiyatli kirdingiz!",
       token,
       subjectId: user.subjectId || undefined,
       adminId: user.id,
     });
   } catch (error) {
-    console.error("Xatolik:", error);
-    res.status(500).json({ message: "Server xatosi!" });
+    console.error("Login xatoligi:", error);
+    return res.status(500).json({ message: "Server xatosi!" });
   }
 };
 
